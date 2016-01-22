@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+<script type="text/javascript">
+function toggleProfile(value){
+	if(value == "0"){
+		document.getElementById('user_info').style.display = "block";
+		document.getElementById('leave_info').style.display = "none";
+		//document.getElementById('assets_info').style.display = "none";
+		document.getElementById('leave_link').classList.remove("link-active");
+		//document.getElementById('assets_link').classList.remove("link-active");
+		document.getElementById('user_link').classList.add("link-active");
+	}
+	else if(value == "1"){
+		document.getElementById('leave_info').style.display = "block";
+		document.getElementById('user_info').style.display = "none";
+		//document.getElementById('assets_info').style.display = "none";
+		document.getElementById('user_link').classList.remove("link-active");
+		//document.getElementById('assets_link').classList.remove("link-active");
+		document.getElementById('leave_link').classList.add("link-active");
+	}
+	else {
+		//document.getElementById('assets_info').style.display = "block";
+		document.getElementById('leave_info').style.display = "none";
+		document.getElementById('user_info').style.display = "none";
+		document.getElementById('leave_link').classList.remove("link-active");
+		document.getElementById('user_link').classList.remove("link-active");
+		//document.getElementById('assets_link').classList.add("link-active");
+	}
+
+}
+</script>
+<SECTION class="content">	
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ empInfo.firstname }} {{ empInfo.lastname }}</h3>      
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-3 col-lg-3 " align="center"> 
+                {% if empInfo.image %}
+      					<img alt="User Pic" src="{{ empInfo.image.url }}" class="img-circle img-responsive">
+                {% endif %}
+      					<div class="links">
+      						<div id="user_link" class="link-active"><a onclick="toggleProfile(0);">Profile Info</a></div>
+      						<div id="leave_link"><a onclick="toggleProfile(1);">Leave balance</a></div>
+      					</div>
+    	        </div>
+              <div class=" col-md-9 col-lg-9 ">
+                <div id="user_info">
+                  <h3 class="info-title">Profile Information</h3>
+                  <table  class="table table-user-information">
+                    <tbody>
+                      <tr>
+                        <td class="field-label">ID:</td>
+                        <td>{{ empInfo.employee_id }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label">Email</td>
+                        <td><a href="mailto:{{ empInfo.email }}">{{ empInfo.email }}</a></td>
+                      </tr>
+                      <tr>
+                        <td class="field-label">Designation</td>
+                        <td>{{ empInfo.designation }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label">Manager</td>
+                        {% if empInfo.manager %}
+                        <td width="20%">{{ empInfo.manager.firstname }} {{ empInfo.manager.lastname }}</td>
+                        {% else %}
+                        <td width="20%">NA</td>
+                        {% endif %}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div id="leave_info" style="display:none;">
+                  <h3 class="info-title">Leave Information</h3>
+                  <table  class="table table-user-information">
+                    <tbody>
+                      <tr>
+                        <td class="field-label">Casual Leaves:</td>
+                        {% if leaveAccuralList.CL %}
+                        <td>{{ leaveAccuralList.CL }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                      <tr>
+                        <td class="field-label">Privileged Leaves:</td>
+                        {% if leaveAccuralList.PL %}
+                        <td>{{ leaveAccuralList.PL }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                      <tr>
+                        <td class="field-label">Sick Leaves:</td>
+                        {% if leaveAccuralList.SL %}
+                        <td>{{ leaveAccuralList.SL }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                      <tr>
+                        <td class="field-label">Comp-off Leaves:</td>
+                        {% if leaveAccuralList.COMP %}
+                        <td>{{ leaveAccuralList.COMP }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                      <tr>
+                        <td class="field-label">Loss of Pay:</td>
+                        {% if leaveAccuralList.LOP %}
+                        <td>{{ leaveAccuralList.LOP }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                      <tr>
+                        <td class="field-label">Work from Home:</td>
+                        {% if leaveAccuralList.WFH %}
+                        <td>{{ leaveAccuralList.WFH }} days</td>
+                        {% else %}
+                        <td>0 days</td>
+                        {% endif %}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div>
+              {% url 'employee_update' id=empInfo.id as empUrl %}
+              <span class="pull-right">
+                {% if "empInfo" not in request.path %}
+                <a href="{{ empUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'employee_delete' id=empInfo.id %}" data-original-title="Remove this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-danger">Delete</a>
+                {% endif %}
+                <a href="{% url 'employees_list' %}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</SECTION>
+
+{% endblock content %}

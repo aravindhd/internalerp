@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% load bootstrap %}
+<br>
+<br>
+<br>
+		<div class="col-md-6 col-md-offset-3">
+            <div id="legend">
+          		<legend>Register</legend>
+        	</div>
+
+	        <form method="post" action=".">
+	                {% csrf_token %}
+	                {{ form|bootstrap_horizontal }}
+	                <input type="submit" value="Submit" class="btn btn-info pull-right"/>
+	        </form>
+		</div>
+{% endblock %}

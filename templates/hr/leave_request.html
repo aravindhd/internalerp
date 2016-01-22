@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load staticfiles %}
+{% load bootstrap %}
+<script src="{% static 'js/date-picker.js' %}"></script>
+<link href="{% static 'css/date-picker.css' %}" rel="stylesheet">
+<script>
+  $(function() {
+    //alert("Trying the Date Widget...");
+    $( ".date_picker" ).datepicker({ format: "yyyy-mm-dd" });
+  });
+</script>
+<SECTION class="content">
+<form class="form-horizontal" role="form" method="POST" action="">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Leave Request</legend>            
+        {{ leaveForm|bootstrap_horizontal }}	
+    </fieldset>
+    <!--fieldset>
+        <legend>Leave Request</legend>
+        <div class="col-md-12">
+            <div class="form-group">
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Employee Name</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="" />
+					</div>
+				</div>
+            
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Employee ID</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-md-6">
+					<label class="col-md-4 control-label" for="sel1">Leave Type</label>
+					<div class="col-md-8">
+						<select class="form-control" id="sel1">
+							<option>Casual Leave</option>
+							<option>Sick Leave</option>
+							<option>Privileged Leave</option>
+							<option>Others</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Available Leaves</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="" value="12" readonly />
+					</div>
+				</div>
+            </div>
+			<div class="form-group">
+                <div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Date From</label>
+					<div class="col-md-8">
+						<input  type="text" class="form-control" placeholder="click to show datepicker"  id="from_date">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Date To</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="click to show datepicker"  id="to_date" />
+					</div>
+				</div>
+            </div>
+			<div class="form-group">
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Number of Days</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="" />
+					</div>
+				</div>
+				<div class="col-md-6">
+					<label for="name" class="col-md-4 control-label">Reason</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" placeholder="" />
+					</div>
+				</div>
+			</div>
+        </div>
+    </fieldset-->
+	<div class="buttons-container">
+		<input type="submit" class="btn btn-primary" value="Submit"></input>
+		<button type="button" class="btn btn-warning">Cancel</button>
+	</div>
+</form>
+	
+</SECTION>
+{% endblock content %}

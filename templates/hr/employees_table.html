@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+<link href="{% static 'django_tables2/themes/paleblue/css/screen.css' %}" rel="stylesheet">
+{% load render_table from django_tables2 %}
+<SECTION class="content">
+	
+<div class="container"> 
+	<legend>Employees</legend>
+	<form method="GET" action=''>
+	<div class="search-box">
+		<label for="name" class="control-label">Employee Name</label>
+		<input type="text" name="search" class="form-control" placeholder="Search" value="{{ request.GET.search }}" />
+	</div>
+	<br>
+	<div class="table-responsive">
+    {% render_table empList %}
+    </div>
+  </div>	
+</SECTION>
+{% endblock content %}

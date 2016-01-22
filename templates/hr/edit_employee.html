@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+{% load bootstrap %}
+
+<SECTION class="content">
+<form class="form-horizontal" role="form" method="POST" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Edit Employee</legend>            
+        {{ empForm|bootstrap_horizontal }}
+
+			<!--div class="form-group">
+                <label for="name" class="col-md-4 control-label">Skill Set</label>
+                <div class="col-md-8">
+                    <textarea class="form-control" rows="5" id="comment"></textarea>
+                </div>
+            </div-->			
+    </fieldset>
+	<div class="buttons-container">
+		<input type="submit" class="btn btn-primary" value="Submit"></button>
+		<button type="button" class="btn btn-warning">Cancel</button>
+	</div>
+</form>
+	
+</SECTION>
+{% endblock content %}

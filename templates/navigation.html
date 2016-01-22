@@ -1,0 +1,69 @@
+{% load staticfiles %}
+<div class="Header">
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				
+                    <img alt="ProcessMaker" src="{% static 'images/logo.png' %}" class="logo">
+				
+				<button type="button" class="navbar-toggle collapsed" 
+					data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				
+			</div>
+			
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				{% if user.is_authenticated %}
+				<ul class="nav navbar-nav">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+						aria-haspopup="true" aria-expanded="false">Human Resources<span class="caret"></span></a>
+						{% url 'employee_create' as newEmpUrl %}
+						{% url 'employees_list' as employeesUrl %}
+						{% url 'leaves_list' as leavesUrl %}
+						{% url 'leave_create' as leaveCreateUrl %}
+						{% url 'employee_leaves' as empLeavesUrl %}
+						{% url 'leaves_allocate' as leavesAllocateUrl %}
+						{% url 'employee_info' as empInfoUrl %}
+						<ul class="dropdown-menu">
+							<li><a href="#" onclick="document.location='{{ newEmpUrl }}'">Add New Employee</a></li>
+							<li><a href="#" onclick="document.location='{{ employeesUrl }}'">Employees</a></li>
+							<li><a href="#" onclick="document.location='{{ leavesUrl }}'">Leave Summary</a></li>
+							<li><a href="#" onclick="document.location='{{ leavesAllocateUrl }}'">Allocate Leaves</a></li>							
+							<li><a href="#" onclick="document.location='{{ empLeavesUrl }}'">My Leaves</a></li>
+							<li><a href="#" onclick="document.location='{{ leaveCreateUrl }}'">Leave Request</a></li>						
+							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>							
+						</ul>
+					</li>
+					<!--li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+						aria-haspopup="true" aria-expanded="false">IT Support<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="#" onclick="document.location='ticket_request.html'">Ticket Request</a></li>
+							
+							<li><a href="#" onclick="document.location='ticket_status.html'">Ticket Status</a></li>
+						</ul>
+					</li-->
+				</ul>
+				<div class="header-icons">				    
+				    	<div class="welcome_text">Welcome</div>
+						<div class="user_text"><img alt="ProcessMaker" src="{% static 'images/users.png' %}" class="users">{{ user.username }}</div>
+						<div class="welcome_text"><img alt="ProcessMaker" src="{% static 'images/logout.png' %}" class="logout"><a href="{% url 'auth_logout' %}?next=/hr/" style="color:#FFF;">Log out</a></div> 
+        				<div class="welcome_text"><a href="{% url 'auth_password_change' %}" style="color:#FFF;">Change password</a></div>    				
+				</div>
+				{% else %}
+					<div class="header-icons">	
+						<div class="welcome_text"><a href="{% url 'auth_login' %}" style="color:#FFF;">Log in</a></div>
+					</div>
+				{% endif %}					
+			</div><!-- /.navbar-collapse -->
+			
+		</div><!-- /.container-fluid -->
+	</nav>
+</div>

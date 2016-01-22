@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+<SECTION class="content">
+	
+<div class="table-responsive container"> 
+	<legend>Leaves</legend>
+    <form method="GET" action=''>
+	<div class="search-box">
+		<label for="name" class="control-label">Leave Info</label>
+		<input type="text" name="searchQueryStr" class="form-control" placeholder="Search" value="{{ request.GET.searchQueryStr }}" />
+	</div>
+    <div class="panel-body">
+        <table id="myTable" class="table table-fixedheader table-hover">
+            <thead>
+                <tr>
+                    <th width="10%">#</th>
+                    <th width="20%">Employee Name</th>
+                    <th width="20%">Leave Type</th>
+                    <th width="20%">Reason</th>
+                    <th width="20%">Start Date</th>
+                    <th width="20%">End Date</th>
+                    <th width="20%"># Days</th>
+					<th width="20%">Status</th>
+                </tr>
+            </thead>
+            <tbody style="height:200px">
+                {% for leave in leavesList %}
+                {% url 'leave_details' id=leave.id as leaveUrl %}
+                <tr onclick="document.location='{{ leaveUrl }}'">
+                    <td width="10%">{{ leave.id }}</td>
+                    <td width="20%">{{ leave.employee_id }}</td>
+                    <td width="20%">{{ leave.leaveType }}</td>
+                    <td width="20%">{{ leave.reason }}</td>
+                    <td width="20%">{{ leave.startedDate }}</td>
+                    <td width="20%">{{ leave.endDate }}</td>
+                    <td width="20%">{{ leave.numberOfDays }}</td>
+                    <td width="20%">{{ leave.status }}</td>
+                </tr>
+                {% endfor %}				
+            </tbody>
+        </table>
+    </div>
+  </div>	
+</SECTION>
+{% endblock content %}
