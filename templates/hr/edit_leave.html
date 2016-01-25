@@ -20,8 +20,9 @@
         {{ leaveForm|bootstrap_horizontal }}	
     </fieldset>
 	<div class="buttons-container">
+    {% url 'leaves_list' as leavesUrl %}
 		<input type="submit" class="btn btn-primary" value="Submit"></button>
-		<button type="button" class="btn btn-warning">Cancel</button>
+		<button onclick="window.location.href='{{ leavesUrl }}'"type="button" class="btn btn-warning">Cancel</button>
 	</div>
 </form>
 	

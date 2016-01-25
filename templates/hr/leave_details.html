@@ -3,67 +3,70 @@
 {% block content %}
 {% load staticfiles %}
 <SECTION class="content">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title">Leave Details</h3>      
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-12 col-lg-12">
+                <div id="user_info">
+                  <h3 class="info-title">Profile Information</h3>
+                  <table  class="table table-user-information">
+                    <table  class="table table-user-information">
+                      <tbody>
+                        <tr>
+                          <td class="field-label">Employee</td>
+                          <td>{{ leaveInfo.employee_id }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">Leave Type</td>
+                          <td>{{ leaveInfo.leaveType }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">Manager</td>
+                          <td width="20%">{{ leaveInfo.employee_id..manager }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">From</td>
+                          <td>{{ leaveInfo.startedDate }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">End</td>
+                          <td>{{ leaveInfo.endDate }}</td>
+                        </tr>
 
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
-      <div class="panel panel-info">
-        <div class="panel-heading">
-          <h3 class="panel-title">Leave Details</h3>
-        </div>
-        <div class=" col-md-9 col-lg-9 "> 
-            <table  class="table table-user-information">
-              <tbody>
-                <tr>
-                  <td class="field-label">ID:</td>
-                  <td>{{ leaveInfo.id }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">Employee</td>
-                  <td>{{ leaveInfo.employee_id }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">Leave Type</td>
-                  <td>{{ leaveInfo.leaveType }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">Manager</td>
-                  <td width="20%">TBA</td>
-                </tr>
-                <tr>
-                  <td class="field-label">From</td>
-                  <td>{{ leaveInfo.startedDate }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">End</td>
-                  <td>{{ leaveInfo.endDate }}</td>
-                </tr>
-
-                <tr>
-                  <td class="field-label">Number of Days</td>
-                  <td>{{ leaveInfo.numberOfDays }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">Reason</td>
-                  <td>{{ leaveInfo.reason }}</td>
-                </tr>
-                <tr>
-                  <td class="field-label">Status</td>
-                  <td>{{ leaveInfo.status }}</td>
-                </tr>
-              </tbody>
-            </table>
+                        <tr>
+                          <td class="field-label">Number of Days</td>
+                          <td>{{ leaveInfo.numberOfDays }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">Reason</td>
+                          <td>{{ leaveInfo.reason }}</td>
+                        </tr>
+                        <tr>
+                          <td class="field-label">Status</td>
+                          <td>{{ leaveInfo.status }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                </div>
+              </div>
+            </div>
+            <div>
+              {% url 'leave_update' id=leaveInfo.id as leaveUrl %}
+              <span class="pull-right">
+                <a href="{{ leaveUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'leaves_list' %}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+              </span>
+            </div>
           </div>
         </div>
-        <div>
-            {% url 'leave_update' id=leaveInfo.id as leaveUrl %}
-                        <span class="pull-right">
-              <a href="{{ leaveUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
-              <a href="{% url 'leaves_list' %}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
-            </span>
-        </div>
+      </div>
     </div>
-  </div>
 </div>  
 </SECTION>
 {% endblock content %}

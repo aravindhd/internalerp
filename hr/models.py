@@ -12,19 +12,20 @@ class EmployeesDirectory(models.Model):
 	lastname = models.CharField(max_length=100)
 	employee_id = models.CharField(max_length=10)
 	email = models.EmailField(max_length=254)
-	#department = models.ForeignKey("Department")
-	manager = models.ForeignKey("self", null=True,blank=True)
-	employment_type = models.CharField(max_length=20, null=True, blank=True, choices=settings.EMPLOYMENT_TYPE_CHOICES)	
+	employment_type = models.CharField(max_length=20,null=True,blank=True,choices=settings.EMPLOYMENT_TYPE_CHOICES,default=settings.DEFAULT_EMPLOYMENT_TYPE)	
+	is_active= models.BooleanField(default=True)
 	designation = models.CharField(max_length=100)
+	manager = models.ForeignKey("self", null=True,blank=True)
+	is_manager = models.BooleanField(default=False)
 	#role = models.IntegerField(default=0)
-	user = models.OneToOneField('auth.user')
+	user = models.OneToOneField('auth.user', on_delete=models.CASCADE)
 	image = models.FileField(upload_to=upoad_location, null=True,blank=True)
 	def __unicode__(self):
 		return '{0} {1}'.format(self.firstname, self.lastname)
 	def get_absolute_url(self):
 		return reverse( "hr:empDetail", kwargs={"id" : self.id } )
 	def __str__(self):
-		return self.fullname
+		return "%s %s" % (self.firstname, self.lastname)
 	class Meta:
 		ordering = ["firstname", "lastname"]
 
@@ -43,7 +44,7 @@ class EmploymentHistory(models.Model):
 class LeaveAccurals(models.Model):
 	employee = models.ForeignKey(EmployeesDirectory, on_delete=models.CASCADE)
 	leaveType = models.CharField(max_length=25, choices=settings.LEAVE_TYPE_CHOICES, default=settings.DEFAULT_LEAVE_TYPE)
-	accuredLeaves = models.IntegerField(default=12)
+	accuredLeaves = models.DecimalField(max_digits=4,decimal_places=2,default=0)
 	last_update_timestamp = models.DateTimeField(auto_now=True,auto_now_add=False)
 
 # Leaves model:
@@ -53,7 +54,7 @@ class Leaves(models.Model):
 	leaveType = models.CharField(max_length=25, choices=settings.LEAVE_TYPE_CHOICES, default=settings.DEFAULT_LEAVE_TYPE)
 	startedDate = models.DateField(auto_now=False,auto_now_add=False)
 	endDate = models.DateField(auto_now=False,auto_now_add=False)
-	numberOfDays = models.IntegerField(default=0)
+	numberOfDays = models.DecimalField(max_digits=4,decimal_places=2,default=0)
 	status = models.CharField(max_length=25, choices=settings.LEAVE_STATUS_CHOICES, default=settings.LEAVE_DEFAULT_STATUS)
 	reason = models.TextField(max_length=508)
 	currentProject = models.CharField(max_length=254)

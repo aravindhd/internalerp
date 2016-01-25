@@ -120,11 +120,20 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Deployment
+
 EMAIL_HOST = 'remote.embedur.com'
-EMAIL_HOST_USER = 'embedur\\aravindhd'
-EMAIL_HOST_PASSWORD = '$*AXRA2dRT*$'
+#EMAIL_HOST_USER = 'embedur\\aravindhd'
+#EMAIL_HOST_PASSWORD = '$*AXRA2dRT*$'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = False
+'''
+#Development
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+EMAIL_USE_TLS = False
+'''
+DEFAULT_FROM_EMAIL = 'noreply@embedur.com'
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, use a different value.
 REGISTRATION_AUTO_LOGIN = True # Automatically log the user in.
@@ -160,20 +169,37 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 #        pass
 
 # HR APP SPECIFIC settings ####
+DEFAULT_USER_ACCOUNT_PASSWD = "Christy94538"
+
+DEFAULT_PAGINATOR_RECORDS_PERPAGE = 10
+
 EMPLOYMENT_TYPE_CHOICES = (
-    ('PE', 'permanent'),
-    ('PB', 'probationary'),
-    ('IN', 'intern'),
-    ('CT', 'contract'),
+    ('PE', 'Permanent'),
+    ('PB', 'Probationary'),
+    ('IN', 'Intern'),
+    ('CT', 'Contract'),
 )
 
+EMPLOYMENT_STATUS_CHOICES = (
+    ('HR', 'Hired'),
+    ('REHR', 'Re-Hired'),
+    ('TERM', 'Terminated'),
+    ('RS', 'Resigned'),
+    ('SUS', 'Suspended'),
+    ('CE', 'Contract Expired'),
+    ('LEFT', 'Left'),
+)
+
+DEFAULT_EMPLOYMENT_TYPE = 'PE'
+DEFAULT_EMPLOYMENT_STATUS = 'HR'
+
 LEAVE_TYPE_CHOICES = (
-    ('CL', 'casual'),
-    ('PL', 'privilege'),
-    ('SL', 'sick'),
-    ('WFH', 'workfromhome'),
-    ('COMP', 'compensation'),
-    ('LOP', 'lossofpay'),
+    ('CL', 'Casual'),
+    ('PL', 'Privilege'),
+    ('SL', 'Sick'),
+    ('WFH', 'Work From Home'),
+    ('COMP', 'Compensation'),
+    ('LOP', 'Loss Of Pay'),
 )
 
 DEFAULT_LEAVE_TYPE = 'PL'

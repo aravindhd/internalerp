@@ -11,17 +11,29 @@
 	<div class="search-box">
 		<label for="name" class="control-label">Employee Name</label>
 		<input type="text" name="searchQueryStr" class="form-control" placeholder="Search" value="{{ request.GET.searchQueryStr }}" />
+        <label class="step-links" style="float:right;display: inline-block; margin-bottom: 5px;font-weight: bold;">
+            {% if empList.has_previous %}
+            <a href="?page={{ empList.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ empList.number }} of {{ empList.paginator.num_pages }}
+            </span>
+            {% if empList.has_next %}
+            <a href="?page={{ empList.next_page_number }}">Next</a>
+            {% endif %}
+        </label>
 	</div>
     <div class="panel-body">
         <table id="myTable" class="table table-fixedheader table-hover">
             <thead>
                 <tr>
-                    <th width="10%">#</th>
+                    <th width="2%">#</th>
+                    <th widht="5%"></th>
                     <th width="10%">Employee ID</th>
                     <th width="20%">Employee Name</th>
                     <th width="20%">Email</th>
                     <th width="20%">Designation</th>
-                                        <th width="20%">Manager</th>
+                    <th width="20%">Manager</th>
                 </tr>
             </thead>
             <tbody style="height:200px">
@@ -29,7 +41,12 @@
                 {% url 'employee_details' id=employee.id as empUrl %}
 
                 <tr onclick="document.location='{{ empUrl }}'">
-                    <td width="10%">{{ employee.id }}</td>
+                    <td width="2%">{{ employee.id }}</td>
+                    <td width="5%">
+                    {% if employee.image %}
+                        <img alt="User Pic" src="{{ employee.image.url }}" class="img-circle img-responsive" style="height:27px;">
+                    {% endif %}
+                    </td>
                     <td width="10%">{{ employee.employee_id }}</td>
                     <td width="20%">{{ employee.firstname }} {{ employee.lastname }}</td>
                     <td width="20%">{{ employee.email }}</td>
@@ -37,19 +54,6 @@
                     <td width="20%">{{ employee.manager.firstname }} {{ employee.manager.lastname }}</td>
                 </tr>
                 {% endfor %}
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if contacts.has_previous %}
-                        <a href="?page={{ contacts.previous_page_number }}">previous</a>
-                        {% endif %}
-                        <span class="current">
-                            Page {{ contacts.number }} of {{ contacts.paginator.num_pages }}.
-                        </span>
-                        {% if contacts.has_next %}
-                        <a href="?page={{ contacts.next_page_number }}">next</a>
-                        {% endif %}
-                    </span>
-                </div>
             </tbody>
         </table>
     </div>
