@@ -7,9 +7,10 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.forms import inlineformset_factory, modelformset_factory
 from .models import EmployeesDirectory, Department, EmploymentHistory, LeaveAccurals, Leaves
-from .forms import employeeForm, leaveForm, leaveAccuralForm
+from .forms import employeeForm, leaveForm, leaveAccuralForm, singleEmployeeLeaveAccuralForm, csvImportLeaveAccuralForm
 from .tables import EmployeesTable
 from django_tables2 import RequestConfig
+import csv
 
 # Create your views here.
 
@@ -174,17 +175,23 @@ def employee_update(request, id):
 		changedData = lAccForm.changed_data
 		for key in changedData:
 			if key == 'pl':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="PL").update(accuredLeaves=cleanedData['pl'])
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='PL', defaults={'accuredLeaves':cleanedData['pl']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="PL").update(accuredLeaves=cleanedData['pl'])
 			elif key == 'cl':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="CL").update(accuredLeaves=cleanedData['cl'])
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='CL', defaults={'accuredLeaves':cleanedData['cl']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="CL").update(accuredLeaves=cleanedData['cl'])
 			elif key == 'sl':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="SL").update(accuredLeaves=cleanedData['sl'])	
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='SL', defaults={'accuredLeaves':cleanedData['sl']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="SL").update(accuredLeaves=cleanedData['sl'])	
 			elif key == 'wfh':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="WFH").update(accuredLeaves=cleanedData['wfh'])	
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='WFH', defaults={'accuredLeaves':cleanedData['wfh']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="WFH").update(accuredLeaves=cleanedData['wfh'])	
 			elif key == 'compoff':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="COMP").update(accuredLeaves=cleanedData['compoff'])	
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='COMP', defaults={'accuredLeaves':cleanedData['compoff']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="COMP").update(accuredLeaves=cleanedData['compoff'])	
 			elif key == 'lop':
-				LeaveAccurals.objects.filter(employee=instance).filter(leaveType="LOP").update(accuredLeaves=cleanedData['lop'])	
+				obj, created = LeaveAccurals.objects.update_or_create(employee=instance, leaveType='LOP', defaults={'accuredLeaves':cleanedData['lop']})
+				#LeaveAccurals.objects.filter(employee=instance).filter(leaveType="LOP").update(accuredLeaves=cleanedData['lop'])	
 			else:
 				pass
 	
@@ -211,37 +218,73 @@ def employee_delete(request, id):
 	context = { 'empInfo' : empInfo }
 	return render(request, 'hr/view_employee.html', context)
 
-## Need to update this function
-'''
 def leaves_allocate(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
 
-	lAccForm = leaveAccuralForm(request.POST, request.FILES or None)
+	lAccForm = singleEmployeeLeaveAccuralForm(request.POST or None)
+	csvForm = csvImportLeaveAccuralForm(request.POST, request.FILES or None)
+	if csvForm.is_valid():
+		for key, file in request.FILES.items():
+			if key == 'csvFile':
+				path = file.name
+				# To permanently save the file in media root
+				#dest = open(path, 'w')
+				#if file.multiple_chunks:
+				#	for c in file.chunks():
+				#		dest.write(c)
+				#else:
+				#	dest.write(file.read())
+				#dest.close()
+				with open(path) as csvFile:
+					reader = csv.reader(csvFile, delimiter=',', quoting=csv.QUOTE_NONE)
+					for row in reader:
+						if len(row) > 1 and len(row) <= 7:
+							emp = EmployeesDirectory.objects.get(employee_id=row[0])
+							print(emp)
+							obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='PL', defaults={'accuredLeaves':row[1]})
+							if row[2]:
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='CL', defaults={'accuredLeaves':row[2]})
+							if row[3]:
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='SL', defaults={'accuredLeaves':row[3]})
+							if row[4]:
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='COMP', defaults={'accuredLeaves':row[4]})
+							if row[5]:
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='WFH', defaults={'accuredLeaves':row[5]})
+							if row[6]:
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='LOP', defaults={'accuredLeaves':row[6]})
+				break;
+	else:
+		csvForm = csvImportLeaveAccuralForm()
+
 	if lAccForm.is_valid():
+		cleanedData = lAccForm.cleaned_data
+		changedData = lAccForm.changed_data
+		#print(changedData[1:len(changedData)])
+		#print(changedData)
+		emp = EmployeesDirectory.objects.get(id=cleanedData['employee'].id)
+		for key in changedData[1:len(changedData)]:
+			updateValues = { 'accuredLeaves' : cleanedData[key]}
+			if key == 'pl':
+				queryKey = "PL"
+			elif key == 'cl':
+				queryKey = "CL"
+			elif key == 'sl':
+				queryKey = "SL"
+			elif key == 'compoff':
+				queryKey = "COMP"
+			elif key == 'wfh':
+				queryKey = "WFH"
+			elif key == 'lop':
+				queryKey = "LOP"
+			else:
+				queryKey = "PL"#Default as PL
+			obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType=queryKey, defaults=updateValues)
+		return redirect('employee_details', id=emp.id)
+	else:
+		lAccForm = singleEmployeeLeaveAccuralForm()
 		
-		return redirect('employee_details', id=instance.id)
-	else:
-		lAccForm = leaveAccuralForm()
-
-	context = { 'lAccform' : lAccForm }
-	return render(request, 'hr/leaves_allocate.html', context)
-'''
-
-def leaves_allocate(request):
-	if not request.user.is_authenticated():
-		return redirect('auth_login')
-
-	LeaveAccuralsFormSet = modelformset_factory(LeaveAccurals, fields=('employee', 'leaveType', 'accuredLeaves'))
-	
-	if request.method == "POST":
-		lAccFormset = LeaveAccuralsFormSet(request.POST)
-		if lAccFormset.is_valid():
-			lAccFormset.save()
-	else:
-		lAccFormset = LeaveAccuralsFormSet() 
-	
-	context = { 'formset' : lAccFormset }
+	context = { 'lAccForm' : lAccForm, 'csvForm':csvForm }
 	return render(request, 'hr/leaves_allocate.html', context)
 
 def leaves_list(request):

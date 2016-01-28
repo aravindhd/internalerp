@@ -62,3 +62,15 @@ class leaveAccuralForm(forms.Form):
 	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,)
 	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=3,max_digits=4,decimal_places=2,)
 	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,)
+
+class singleEmployeeLeaveAccuralForm(forms.Form):
+	employee = forms.ModelChoiceField(queryset=EmployeesDirectory.objects.all(),required=True,initial=0) 
+	pl = forms.DecimalField(label='Privilege Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
+	cl = forms.DecimalField(label='Casual Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
+	sl = forms.DecimalField(label='Sick Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
+	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,initial=0)
+	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=3,max_digits=4,decimal_places=2,initial=0)
+	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,initial=0)
+
+class csvImportLeaveAccuralForm(forms.Form):
+	csvFile = forms.FileField(required=False, label='CSV File')

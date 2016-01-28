@@ -3,16 +3,26 @@
 {% load staticfiles %}
 {% load bootstrap %}
 <SECTION class="content">
-<form class="form-horizontal" role="form" method="POST" action="">
+<form class="form-horizontal" role="form" method="POST" action="" enctype="multipart/form-data">
     {% csrf_token %}
     <fieldset>
-        <legend>Leave Allocation</legend>            
-        {{ formset.as_table }}	
+        <legend>Leave Allocation by Import</legend>
+        {{ csvForm | bootstrap_horizontal }}             	
     </fieldset>
     <div class="buttons-container">
-		<input type="submit" class="btn btn-primary" value="Submit"></input>
-		<button type="button" class="btn btn-warning">Cancel</button>
+		<input type="submit" class="btn btn-primary" value="Import"></input>
+		<button type="button" class="btn btn-warning" onclick="window.location.href='{% url 'employees_list' %}'">Cancel</button>
 	</div>
+    <br>
+    <br>
+    <fieldset>
+        <legend>Leave Allocation per Employee</legend>            
+        {{ lAccForm | bootstrap_horizontal }}    
+    </fieldset>
+    <div class="buttons-container">
+        <input type="submit" class="btn btn-primary" value="Submit"></input>
+        <button type="button" class="btn btn-warning" onclick="window.location.href='{% url 'employees_list' %}'">Cancel</button>
+    </div>
 </form>
 	
 </SECTION>
