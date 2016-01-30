@@ -6,13 +6,82 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.forms import inlineformset_factory, modelformset_factory
+from .models import Country, Organization, Holidays
 from .models import EmployeesDirectory, Department, EmploymentHistory, LeaveAccurals, Leaves
-from .forms import employeeForm, leaveForm, leaveAccuralForm, singleEmployeeLeaveAccuralForm, csvImportLeaveAccuralForm
+from .forms import countryForm, organizationForm, holidaysForm
+from .forms import employeeForm, leaveRequestForm, leaveEditForm, leaveAccuralForm, singleEmployeeLeaveAccuralForm, csvImportLeaveAccuralForm
 from .tables import EmployeesTable
 from django_tables2 import RequestConfig
 import csv
+from utils.mails import _process_mail_for_leave_request
 
 # Create your views here.
+def country_configure(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	if request.method == "POST":
+		ctryForm = countryForm(request.POST)
+		if ctryForm.is_valid():
+			ctryForm.save()
+			return redirect('country_list')
+		else:
+			print("Add Country Form has errors.....")
+	else:
+		ctryForm = countryForm()		
+	context = { "countryForm" : ctryForm }
+	return render(request, 'hr/country_configure.html', context)	
+
+def organization_configure(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	if request.method == "POST":
+		orgForm = organizationForm(request.POST)
+		if orgForm.is_valid():
+			orgForm.save()
+			return redirect('org_list')
+		else:
+			print("Add Organization Form has errors.....")
+	else:
+		orgForm = organizationForm()
+	context = { "organizationForm" : orgForm}
+	return render(request, 'hr/organization_configure.html', context)
+	#return redirect('employees_list')
+
+def country_list(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	countryList = Country.objects.all()
+	context = { "countryList" : countryList }
+	return render(request, 'hr/countries.html', context)
+
+def organization_list(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	orgList = Organization.objects.all()
+	context = { "orgList" : orgList }
+	return render(request, 'hr/organizations.html', context)
+
+def view_holidays(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	holidaysList = Holidays.objects.all()
+	context = { "holidaysList" : holidaysList }
+	return render(request, 'hr/holidays.html', context)
+
+def add_holiday(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	if request.method == "POST":
+		holidayForm = holidaysForm(request.POST)
+		if holidayForm.is_valid():
+			holidayForm.save()
+			return redirect('view_holidays')
+		else:
+			print("Add Holiday Form has errors.....")
+	else:
+		holidayForm = holidaysForm()
+	context = { "holidayForm" : holidayForm}
+	return render(request, 'hr/addHoliday.html', context)
 
 def employees_table(request):
 	#if not request.user.is_staff or not request.user.is_superuser:
@@ -97,34 +166,36 @@ def employee_create(request):
 	#	raise Http404
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
+	if request.method == "POST":
+		empForm = employeeForm(request.POST, request.FILES or None)
+		lAccForm = leaveAccuralForm(request.POST or None)
+		if empForm.is_valid() and lAccForm.is_valid():
+			empData = empForm.cleaned_data
+			## Create a user account first with given firstname & lastname 
+			## then proceed for creating Employee details
+			username = '%s%s' %(empData['firstname'], empData['lastname'][0])
+			user = User.objects.create_user(username.lower(), empData['email'], settings.DEFAULT_USER_ACCOUNT_PASSWD)
+			user.first_name=empData['firstname']
+			user.last_name=empData['lastname']
+			user.save()
 
-	empForm = employeeForm(request.POST, request.FILES or None)
-	lAccForm = leaveAccuralForm(request.POST or None)
-	if empForm.is_valid() and lAccForm.is_valid():
-		empData = empForm.cleaned_data
-		## Create a user account first with given firstname & lastname 
-		## then proceed for creating Employee details
-		username = '%s%s' %(empData['firstname'], empData['lastname'][0])
-		user = User.objects.create_user(username.lower(), empData['email'], settings.DEFAULT_USER_ACCOUNT_PASSWD)
-		user.first_name=empData['firstname']
-		user.last_name=empData['lastname']
-		user.save()
+			# Creating Employee record
+			instance = empForm.save(commit=False)
+			instance.user = user
+			instance.save()
 
-		# Creating Employee record
-		instance = empForm.save(commit=False)
-		instance.user = user
-		instance.save()
-
-		# Creating Leave Accurals for the new employee record
-		data = lAccForm.cleaned_data
-		lAcc = instance.leaveaccurals_set.create(leaveType='PL',accuredLeaves=data['pl'])
-		lAcc = instance.leaveaccurals_set.create(leaveType='CL',accuredLeaves=data['cl'])
-		lAcc = instance.leaveaccurals_set.create(leaveType='SL',accuredLeaves=data['sl'])
-		lAcc = instance.leaveaccurals_set.create(leaveType='WFH',accuredLeaves=data['wfh'])
-		lAcc = instance.leaveaccurals_set.create(leaveType='LOP',accuredLeaves=data['lop'])
-		lAcc = instance.leaveaccurals_set.create(leaveType='COMP',accuredLeaves=data['compoff'])
-		
-		return redirect('employee_details', id=instance.id)
+			# Creating Leave Accurals for the new employee record
+			data = lAccForm.cleaned_data
+			lAcc = instance.leaveaccurals_set.create(leaveType='PL',accuredLeaves=data['pl'])
+			lAcc = instance.leaveaccurals_set.create(leaveType='CL',accuredLeaves=data['cl'])
+			lAcc = instance.leaveaccurals_set.create(leaveType='SL',accuredLeaves=data['sl'])
+			lAcc = instance.leaveaccurals_set.create(leaveType='WFH',accuredLeaves=data['wfh'])
+			lAcc = instance.leaveaccurals_set.create(leaveType='LOP',accuredLeaves=data['lop'])
+			lAcc = instance.leaveaccurals_set.create(leaveType='COMP',accuredLeaves=data['compoff'])
+			
+			return redirect('employee_details', id=instance.id)
+		else:	# Form has errors
+			print("Invalid New Employee FORM......")
 	else:
 		empForm = employeeForm()
 		lAccInitData = { 'pl' : 0.00, 'cl' : 0.00, 'sl' : 0.00, 'lop' : 0.00, 'wfh' : 0.00, 'compoff' : 0.00}
@@ -221,67 +292,72 @@ def employee_delete(request, id):
 def leaves_allocate(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
+	if request.method == "POST":
+		
+		lAccForm = singleEmployeeLeaveAccuralForm(request.POST or None)
+		csvForm = csvImportLeaveAccuralForm(request.POST, request.FILES or None)
 
-	lAccForm = singleEmployeeLeaveAccuralForm(request.POST or None)
-	csvForm = csvImportLeaveAccuralForm(request.POST, request.FILES or None)
-	if csvForm.is_valid():
-		for key, file in request.FILES.items():
-			if key == 'csvFile':
-				path = file.name
-				# To permanently save the file in media root
-				#dest = open(path, 'w')
-				#if file.multiple_chunks:
-				#	for c in file.chunks():
-				#		dest.write(c)
-				#else:
-				#	dest.write(file.read())
-				#dest.close()
-				with open(path) as csvFile:
-					reader = csv.reader(csvFile, delimiter=',', quoting=csv.QUOTE_NONE)
-					for row in reader:
-						if len(row) > 1 and len(row) <= 7:
-							emp = EmployeesDirectory.objects.get(employee_id=row[0])
-							print(emp)
-							obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='PL', defaults={'accuredLeaves':row[1]})
-							if row[2]:
-								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='CL', defaults={'accuredLeaves':row[2]})
-							if row[3]:
-								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='SL', defaults={'accuredLeaves':row[3]})
-							if row[4]:
-								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='COMP', defaults={'accuredLeaves':row[4]})
-							if row[5]:
-								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='WFH', defaults={'accuredLeaves':row[5]})
-							if row[6]:
-								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='LOP', defaults={'accuredLeaves':row[6]})
-				break;
+		if csvForm.is_valid():
+			for key, file in request.FILES.items():
+				if key == 'csvFile':
+					path = file.name
+					# To permanently save the file in media root
+					#dest = open(path, 'w')
+					#if file.multiple_chunks:
+					#	for c in file.chunks():
+					#		dest.write(c)
+					#else:
+					#	dest.write(file.read())
+					#dest.close()
+					with open(path) as csvFile:
+						reader = csv.reader(csvFile, delimiter=',', quoting=csv.QUOTE_NONE)
+						for row in reader:
+							if len(row) > 1 and len(row) <= 7:
+								emp = EmployeesDirectory.objects.get(employee_id=row[0])
+								print(emp)
+								obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='PL', defaults={'accuredLeaves':row[1]})
+								if row[2]:
+									obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='CL', defaults={'accuredLeaves':row[2]})
+								if row[3]:
+									obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='SL', defaults={'accuredLeaves':row[3]})
+								if row[4]:
+									obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='COMP', defaults={'accuredLeaves':row[4]})
+								if row[5]:
+									obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='WFH', defaults={'accuredLeaves':row[5]})
+								if row[6]:
+									obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType='LOP', defaults={'accuredLeaves':row[6]})
+					break;
+		else:
+			print("Leave Allocate CSV Form has errors......")
+
+		if lAccForm.is_valid():
+			cleanedData = lAccForm.cleaned_data
+			changedData = lAccForm.changed_data
+			#print(changedData[1:len(changedData)])
+			#print(changedData)
+			emp = EmployeesDirectory.objects.get(id=cleanedData['employee'].id)
+			for key in changedData[1:len(changedData)]:
+				updateValues = { 'accuredLeaves' : cleanedData[key]}
+				if key == 'pl':
+					queryKey = "PL"
+				elif key == 'cl':
+					queryKey = "CL"
+				elif key == 'sl':
+					queryKey = "SL"
+				elif key == 'compoff':
+					queryKey = "COMP"
+				elif key == 'wfh':
+					queryKey = "WFH"
+				elif key == 'lop':
+					queryKey = "LOP"
+				else:
+					queryKey = "PL"#Default as PL
+				obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType=queryKey, defaults=updateValues)
+			return redirect('employee_details', id=emp.id)
+		else:
+			print("Leave Allocate singleEmployeeLeaveAccuralForm has errors......")
 	else:
 		csvForm = csvImportLeaveAccuralForm()
-
-	if lAccForm.is_valid():
-		cleanedData = lAccForm.cleaned_data
-		changedData = lAccForm.changed_data
-		#print(changedData[1:len(changedData)])
-		#print(changedData)
-		emp = EmployeesDirectory.objects.get(id=cleanedData['employee'].id)
-		for key in changedData[1:len(changedData)]:
-			updateValues = { 'accuredLeaves' : cleanedData[key]}
-			if key == 'pl':
-				queryKey = "PL"
-			elif key == 'cl':
-				queryKey = "CL"
-			elif key == 'sl':
-				queryKey = "SL"
-			elif key == 'compoff':
-				queryKey = "COMP"
-			elif key == 'wfh':
-				queryKey = "WFH"
-			elif key == 'lop':
-				queryKey = "LOP"
-			else:
-				queryKey = "PL"#Default as PL
-			obj, created = LeaveAccurals.objects.update_or_create(employee=emp, leaveType=queryKey, defaults=updateValues)
-		return redirect('employee_details', id=emp.id)
-	else:
 		lAccForm = singleEmployeeLeaveAccuralForm()
 		
 	context = { 'lAccForm' : lAccForm, 'csvForm':csvForm }
@@ -316,32 +392,37 @@ def leave_create(request):
 	#	raise Http404
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
+	emp = EmployeesDirectory.objects.get(user=request.user)
+	holidaysList = Holidays.objects.filter(country=emp.organization.country)
 
-	lForm = leaveForm(request.POST, request.FILES or None)
-	if lForm.is_valid():
-		#leaveData = lForm.cleaned_data
-		instance = lForm.save(commit=False)
-		instance.save()
-		
-		subject = "%s Request from %s" % (instance.leaveType, instance.employee_id)
-		mailBody = "<p>Dear %s,<br><br>Leave Request from %s, for %s days between %s and %s under %s category.<br><br>Please Login to Portal to validate the request.<br><br>Thanks,<br>HR Admin - Internal Portal</p>"  % (instance.employee_id.manager, instance.employee_id, instance.numberOfDays, instance.startedDate, instance.endDate, instance.leaveType) 
-		
-		print('>>>>>>>>>> Trying to send email for new Leave Request:')
-		try:
-			email = EmailMessage(subject, mailBody, settings.DEFAULT_FROM_EMAIL,
-            					[instance.employee_id.manager.email], ['noreply@embedur.com'],
-            					cc=['venkateshm@embedur.com', instance.employee_id.email])
-			email.content_subtype = "html"
-			email.send(fail_silently=False)
-			instance.update(status=settings.LEAVE_STATUS_CHOICES)
-		except:
-			print("Mail Send Failed.!!!!!!")
-		return redirect('leave_details', id=instance.id)
+	if request.method == "POST":
+		if emp.is_manager:	# TODO: Instaed of manager check user role in future
+			lForm = leaveRequestForm(False, request.POST, request.FILES or None, initial = {'employee_id': emp })	
+		else:
+			lForm = leaveRequestForm(True, request.POST, request.FILES or None, initial = {'employee_id': emp })
+
+		if lForm.is_valid():
+			#leaveData = lForm.cleaned_data
+			instance = lForm.save(commit=False)
+			
+			# Send EMAIL
+			_process_mail_for_leave_request(instance, 'html')
+			
+			print("Updating the Status after mail sent")
+			instance.status = "SUBMITTED"
+			instance.save()
+
+			return redirect('leave_details', id=instance.id)
 	else:
-		lForm = leaveForm()
+		# TODO: Instaed of manager check user role in future
+		if emp.is_manager:
+			lForm = leaveRequestForm(False, initial = {'employee_id': emp })
+		else:
+			lForm = leaveRequestForm(True, initial = {'employee_id': emp })
 
 	context = {
-		"leaveForm" : lForm
+		"leaveForm" : lForm,
+		"holidaysList" : holidaysList
 	}
 	return render(request, 'hr/leave_request.html', context)
 
@@ -356,19 +437,49 @@ def leave_update(request, id):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
 	instance = get_object_or_404(Leaves, id=id)
-	lForm = leaveForm(request.POST or None, instance=instance)
-	if lForm.is_valid():
-		instance = lForm.save(commit=False)
-		instance.save()
-
-		leaveTypeChoices = dict(settings.LEAVE_TYPE_CHOICES)
-		leaveStatusChoices = dict(settings.LEAVE_STATUS_CHOICES)
-		print(leaveTypeChoices)
-		print(leaveStatusChoices)
-
-		return redirect('leaves_list')
+	print("Getting the Manager details")
+	print(instance.employee_id.manager)
+	
+	leaveStatusChoices = dict(settings.LEAVE_STATUS_CHOICES)
+	print(leaveStatusChoices)
+	contextLeaveStatusChoices = []
+	userRole = 'employee'
+	if instance.employee_id.manager and (request.user == instance.employee_id.manager.user):
+		# Manager Login
+		print("Manager corresponding to this leave records UPDATES it.")
+		contextLeaveStatusChoices.append(('APPROVED', 'Approve'),)
+		contextLeaveStatusChoices.append(('REJECTED', 'Reject'),)
+		userRole = 'manager'
+	elif instance.employee_id.user == request.user:
+		# Employee login
+		print("Employee corresponding to this leave records UPDATES it.")
+		if instance.status == "SUBMITTED":
+			contextLeaveStatusChoices.append(('SUBMITTED', 'Submit'),)
+		contextLeaveStatusChoices.append(('REOPENED', 'Re-Open'),)
+		contextLeaveStatusChoices.append(('DISCARD', 'Discard'),)
+		userRole = 'employee'
 	else:
-		lForm = leaveForm(instance=instance)
+		# Admin Login
+		contextLeaveStatusChoices = settings.LEAVE_STATUS_CHOICES
+		print("Admin updating the leave record")
+		userRole = 'admin'
+
+	if request.method == "POST":
+		lForm = leaveEditForm(contextLeaveStatusChoices, userRole, request.POST or None, instance=instance)
+	
+		#print("Trying to verify whether leaveEditForm is valid or not!!!!!")
+		if lForm.is_valid():
+			#print("Form validated.....")
+			cleanedData = lForm.cleaned_data
+			instance = lForm.save(commit=False)		# Has Custom FORM save definition
+			
+			return redirect('leaves_list')
+	else:
+		print(">>>>> GET Leave Update:....")
+		lForm = leaveEditForm(contextLeaveStatusChoices, userRole, instance=instance)
+		print(lForm.fields['status'])
+		#lForm.fields['employee_id'].widget.attrs['readonly'] = True # text input
+		#lForm.fields['employee_id'].widget.attrs['disabled'] = True # text input
 
 	context = {
 		"instance" : instance,

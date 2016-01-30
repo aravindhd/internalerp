@@ -56,12 +56,18 @@ function toggleProfile(value){
                             <div class=" col-md-9 col-lg-9 ">
                                 <div id="user_info">
                                     <h3 class="info-title">Profile Information</h3>
+                                    {% if empForm.errors %}
+                                    <p style="color: red;">Please correct the specified errors below.</p>
+                                    {% endif %}
                                     <fieldset>
                                         {{ empForm|bootstrap_horizontal }}
                                     </fieldset>
                                 </div>
                                 <div id="leave_info" style="display:none;">
                                     <h3 class="info-title">Leave Balance</h3>
+                                    {% if lAccForm.errors %}
+                                    <p style="color: red;">Please correct the specified errors below.</p>
+                                    {% endif %}
                                     <fieldset>
                                         {{ lAccForm | bootstrap_horizontal }}
                                     </fieldset>

@@ -14,7 +14,6 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				
 			</div>
 			
 			<!-- Collect the nav links, forms, and other content for toggling -->
@@ -38,9 +37,27 @@
 							<li><a href="#" onclick="document.location='{{ leavesAllocateUrl }}'">Allocate Leaves</a></li>							
 							<li><a href="#" onclick="document.location='{{ empLeavesUrl }}'">My Leaves</a></li>
 							<li><a href="#" onclick="document.location='{{ leaveCreateUrl }}'">Leave Request</a></li>						
-							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>							
+							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>	
 						</ul>
 					</li>
+					{% if user.is_superuser %}
+					<li class="dropdown">
+						{% url 'country_list' as countriesUrl %}
+						{% url 'org_list' as orgsUrl %}
+						{% url 'view_holidays' as holidaysUrl %}
+						{% url 'add_holiday' as newHolidayUrl %}
+						{% url 'country_configure' as newCountryUrl %}
+						{% url 'organization_configure' as newOrgUrl %}
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+						aria-haspopup="true" aria-expanded="false">Configure<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="#" onclick="document.location='{{newCountryUrl}}'">Add Country</a></li>
+							<li><a href="#" onclick="document.location='{{countriesUrl}}'">Countries</a></li>
+							<li><a href="#" onclick="document.location='{{newOrgUrl}}'">Add Organization</a></li><li><a href="#" onclick="document.location='{{orgsUrl}}'">Organizations</a></li>
+							<li><a href="#" onclick="document.location='{{newHolidayUrl}}'">Add Holiday</a></li><li><a href="#" onclick="document.location='{{holidaysUrl}}'">Holidays</a></li>
+						</ul>
+					</li>
+					{% endif %}
 					<!--li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
 						aria-haspopup="true" aria-expanded="false">IT Support<span class="caret"></span></a>

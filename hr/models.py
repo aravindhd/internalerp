@@ -3,15 +3,36 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+import datetime
+
+YEAR_CHOICES = []
+for r in range(1980, (datetime.datetime.now().year+1)):
+    YEAR_CHOICES.append((r,r))
 
 def upoad_location(instance, filename):
-	return "%s/%s" %(instance.id, filename)
+	return "%s/%s" %(instance.employee_id, filename)
+
+class Country(models.Model):
+	country_code = models.CharField(blank=False, max_length=3)
+	country_desc = models.CharField(blank=False,max_length=100)
+	def __unicode__(self):
+		return '%s' % (self.country_desc)
+
+class Organization(models.Model):
+	name = models.CharField(max_length=254,blank=False)
+	location = models.CharField(max_length=100)
+	#address = models.CharField(max_length=254)
+	country = models.ForeignKey(Country)
+	is_headoffice = models.BooleanField(default=False)
+	def __unicode__(self):
+		return '%s' % (self.name)
 
 class EmployeesDirectory(models.Model):
 	firstname = models.CharField(max_length=100)
 	lastname = models.CharField(max_length=100)
 	employee_id = models.CharField(max_length=10)
 	email = models.EmailField(max_length=254)
+	organization = models.ForeignKey(Organization)
 	employment_type = models.CharField(max_length=20,null=True,blank=True,choices=settings.EMPLOYMENT_TYPE_CHOICES,default=settings.DEFAULT_EMPLOYMENT_TYPE)	
 	is_active= models.BooleanField(default=True)
 	designation = models.CharField(max_length=100)
@@ -47,6 +68,14 @@ class LeaveAccurals(models.Model):
 	accuredLeaves = models.DecimalField(max_digits=4,decimal_places=2,default=0)
 	last_update_timestamp = models.DateTimeField(auto_now=True,auto_now_add=False)
 
+class Holidays(models.Model):
+	description = models.CharField(max_length=254, blank=False)
+	date = models.DateField(auto_now=False, auto_now_add=False)
+	country = models.ForeignKey(Country)
+	year = models.IntegerField(choices=YEAR_CHOICES, default=datetime.datetime.now().year)
+	def __unicode__(self):
+		return '%s' % (self.description)
+
 # Leaves model:
 # This model will store complete history of Leave process workflow
 class Leaves(models.Model):
@@ -56,7 +85,8 @@ class Leaves(models.Model):
 	endDate = models.DateField(auto_now=False,auto_now_add=False)
 	numberOfDays = models.DecimalField(max_digits=4,decimal_places=2,default=0)
 	status = models.CharField(max_length=25, choices=settings.LEAVE_STATUS_CHOICES, default=settings.LEAVE_DEFAULT_STATUS)
-	reason = models.TextField(max_length=508)
+	reason = models.CharField(max_length=254)
+	rejection_reason = models.TextField(max_length=300)
 	currentProject = models.CharField(max_length=254)
 	creation_timestamp = models.DateTimeField(auto_now=False,auto_now_add=True)
 	last_update_timestamp = models.DateTimeField(auto_now=True,auto_now_add=False)

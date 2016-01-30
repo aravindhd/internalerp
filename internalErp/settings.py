@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'hr',
+    'utils',
     'bootstrapform',
     'registration',
     'django_tables2',
@@ -169,6 +170,8 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 #        pass
 
 # HR APP SPECIFIC settings ####
+MAIL_ENABLE = True
+
 DEFAULT_USER_ACCOUNT_PASSWD = "Christy94538"
 
 DEFAULT_PAGINATOR_RECORDS_PERPAGE = 10
@@ -205,12 +208,13 @@ LEAVE_TYPE_CHOICES = (
 DEFAULT_LEAVE_TYPE = 'PL'
 
 LEAVE_STATUS_CHOICES = (
-    ('CREATED', 'created'),
-    ('SUBMITTED', 'submitted'),
-    ('APPROVED', 'approved'),
-    ('REJECTED', 'rejected'),
-    ('CLOSED', 'closed'),
-    ('REOPENED', 'reopened'),
+    ('CREATED', 'Create'),
+    ('SUBMITTED', 'Submit'),
+    ('APPROVED', 'Approve'),
+    ('REJECTED', 'Reject'),
+    ('CLOSED', 'Close'),
+    ('REOPENED', 'Re-open'),
+    ('DISCARD', 'Discard'),
 )
 
 LEAVE_DEFAULT_STATUS = 'CREATED'

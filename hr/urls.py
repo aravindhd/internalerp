@@ -13,6 +13,12 @@ urlpatterns = [
     url(r'^leaveCreate/$', views.leave_create, name='leave_create'),
     url(r'^leaveUpdate/(?P<id>[0-9]+)/$', views.leave_update, name='leave_update'),
     url(r'^empleaves/$', views.employee_leaves, name='employee_leaves'),
+    url(r'^holidays/$', views.view_holidays, name='view_holidays'),
+    url(r'^holidays/add/$', views.add_holiday, name='add_holiday'),
+    url(r'^countryConfigure/$', views.country_configure, name='country_configure'),
+    url(r'^countries/$', views.country_list, name='country_list'),
+    url(r'^orgConfigure/$', views.organization_configure, name='organization_configure'),
+    url(r'^organizations/$', views.organization_list, name='org_list'),
 
     url(r'^leavesAllocate/$', views.leaves_allocate, name='leaves_allocate'),
     url(r'^empInfo/$', views.employee_info, name='employee_info'),
