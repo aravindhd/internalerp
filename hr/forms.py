@@ -36,8 +36,9 @@ class employeeForm(forms.ModelForm):
 			"is_manager",
 			"employment_type",
 			"designation",
+			"role",
 			"is_active",
-			"image"
+			"image",
 			]
 		labels = {
             'firstname': 'Firstname',
@@ -49,6 +50,7 @@ class employeeForm(forms.ModelForm):
             'is_manager' : 'Is Manager',
             'is_active': 'Is Active',
             'image' : 'Employee Image',
+            'role' : 'User Role',
         }
 
 class holidaysForm(forms.ModelForm):
@@ -66,7 +68,6 @@ class leaveRequestForm(forms.ModelForm):
 			self.fields['employee_id'].widget.attrs['class'] = 'readOnlySelect'
 
 	def clean(self):
-		print(">>>>>> leaveRequestForm clean() definition ......")
 		emp = self.cleaned_data.get('employee_id')
 		lType = self.cleaned_data.get('leaveType')
 		fromDate = self.cleaned_data.get('startedDate')
@@ -82,14 +83,14 @@ class leaveRequestForm(forms.ModelForm):
 		if endDate < fromDate:
 			err = "[ End date cannot be earlier than start date ]"
 			self._errors["invalid_dates"] = err
-			errors.append(err)			
-		if ( Decimal(empAccuredLeaves) < Decimal(numDays) ):
-			err = "[ Employee do not have sufficient leave balance under %s category ]" %(lType)
-			self._errors["balance_error"] = err
 			errors.append(err)
 		if Decimal(numDays) > Decimal(numberBusinessDays):
 			err = "[ Provide valid number of days considering weekends and holidays ]"
 			self._errors["invalid_numdays"] = err
+			errors.append(err)
+		if (lType != "LOP") and ( Decimal(empAccuredLeaves) < Decimal(numDays) ):
+			err = "[ Employee do not have sufficient leave balance under %s category ]" %(lType)
+			self._errors["balance_error"] = err
 			errors.append(err)
 
 		if len(errors):
@@ -98,7 +99,6 @@ class leaveRequestForm(forms.ModelForm):
 			return self.cleaned_data
 
 	def save(self, commit=False):
-		print(">>>>>> leaveRequestForm SAVE Override....")		
 		leaveReqForm = super(leaveRequestForm, self).save(commit=False)
 		
 		# Update the Leave Accural balance and save this form
@@ -106,7 +106,11 @@ class leaveRequestForm(forms.ModelForm):
 		lType = self.cleaned_data.get('leaveType')
 		numDays = self.cleaned_data.get('numberOfDays')
 		empAccBalance = LeaveAccurals.objects.get(employee=emp, leaveType=lType).accuredLeaves
-		newAccLeaveBalance = Decimal(empAccBalance) - Decimal(numDays)
+		if lType == 'LOP':
+			newAccLeaveBalance = Decimal(empAccBalance) - Decimal(numDays)
+		else:
+			newAccLeaveBalance = Decimal(empAccBalance) + Decimal(numDays)
+
 		LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccLeaveBalance)
 		
 		# Saving the leave request info
@@ -168,18 +172,23 @@ class leaveEditForm(forms.ModelForm):
 		for holiday in holidays:
 			empHolidays.append(holiday['date'])
 		numberBusinessDays = networkdays(fromDate, endDate, empHolidays)
+
+		prevNumDays = Leaves.objects.get(id=self.instance.id).numberOfDays
+
+		empAccuredLeaves = (empAccuredLeaves + prevNumDays)
+
 		errors = []
 		if endDate < fromDate:
 			err = "[ End date cannot be earlier than start date ]"
 			self._errors["invalid_dates"] = err
-			errors.append(err)			
-		if ( Decimal(empAccuredLeaves) < Decimal(numDays) ):
-			err = "[ Employee do not have sufficient leave balance under %s category ]" %(lType)
-			self._errors["balance_error"] = err
 			errors.append(err)
 		if Decimal(numDays) > Decimal(numberBusinessDays):
 			err = "[ Provide valid number of days considering weekends and holidays ]"
 			self._errors["invalid_numdays"] = err
+			errors.append(err)
+		if (lType != "LOP") and ( Decimal(empAccuredLeaves) < Decimal(numDays) ):
+			err = "[ Employee do not have sufficient leave balance under %s category ]" %(lType)
+			self._errors["balance_error"] = err
 			errors.append(err)
 
 		if len(errors):
@@ -191,32 +200,53 @@ class leaveEditForm(forms.ModelForm):
 		print(">>>>>> leaveEditForm SAVE Override....")
 		#print(self.instance.id) # To get the db stored value
 		leaveUpdForm = super(leaveEditForm, self).save(commit=False)
-		
+
 		# Update the Leave Accural balance and save this form
 		emp = self.cleaned_data.get('employee_id')
 		lType = self.cleaned_data.get('leaveType')
-		newNumDays = self.cleaned_data.get('numberOfDays')
+		numDays = self.cleaned_data.get('numberOfDays')
 		status = self.cleaned_data.get('status')
 		empAccBalance = LeaveAccurals.objects.get(employee=emp, leaveType=lType).accuredLeaves
-		oldLeaveCount = Leaves.objects.get(id=self.instance.id).numberOfDays
-		doUpdate = False
-		if (status == 'REJECTED') or (status == 'DISCARD'):
-			newAccLeaveBalance = Decimal(empAccBalance) + Decimal(oldLeaveCount)	# Revert the leave balance
-			doUpdate = True
+
+		prevNumDays = Leaves.objects.get(id=self.instance.id).numberOfDays
+		prevStatus = Leaves.objects.get(id=self.instance.id).status
+		prevLType = Leaves.objects.get(id=self.instance.id).leaveType
+
+		doAccuralUpdate = False
+
+		# Manager approves/rejects a leave
+		# Employee Discards/cancels the submitted non-updated leave 
+		if ( (prevStatus == 'SUBMITTED') or (prevStatus == 'CREATED') or (prevStatus == 'REOPENED') ) and \
+		   ((status == 'REJECTED') or (status == 'DISCARD') ):
+			if prevLType == 'LOP':
+				newAccuralBalance = (Decimal(empAccBalance) - Decimal(prevNumDays))
+			else:
+				newAccuralBalance = (Decimal(empAccBalance) + Decimal(prevNumDays))
+			doAccuralUpdate = True
+		elif ( (prevStatus == 'REJECTED') or (prevStatus == 'DISCARD') ) and (status == 'REOPENED'):# Employee re-opens rejected/discarded leave
+			if prevLType == 'LOP':
+				newAccuralBalance = Decimal(empAccBalance) + Decimal(numDays)
+			else:
+				newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
+			doAccuralUpdate = True
+		elif (prevStatus == 'APPROVED') and (status == 'DISCARD'):# Employee cancels approved leave
+			if prevLType == 'LOP':
+				newAccuralBalance = Decimal(empAccBalance) - Decimal(prevNumDays)
+			else:
+				newAccuralBalance = Decimal(empAccBalance) + Decimal(prevNumDays)
+			doAccuralUpdate = True
+		elif (prevStatus == 'APPROVED') and (status == 'REJECTED'):# Manager re-edits and rejects an approved leave
+			if prevLType == 'LOP':
+				newAccuralBalance = Decimal(empAccBalance) - Decimal(prevNumDays)
+			else:
+				newAccuralBalance = Decimal(empAccBalance) + Decimal(prevNumDays)
+			doAccuralUpdate = True
 		else:
-			if (oldLeaveCount != newNumDays):	# if there is change only in dates/days, updating leaveBalance
-				newAccLeaveBalance = (Decimal(empAccBalance) + Decimal(oldLeaveCount))- Decimal(newNumDays)
-				doUpdate = True
-			#else:
-			#	newAccLeaveBalance = Decimal(empAccBalance) - Decimal(newNumDays)
-		#TODO:
-		# Cover use-cases: Reject-Re-Open-Approve
-		# - user submit-re-open- provide leave count > accural -submit
-		
-		# Update only if there is any change to leave balance
-		if doUpdate:
-			LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccLeaveBalance)
-		
+			pass # Throw error if any states mismatches TODO:
+
+		if doAccuralUpdate:
+			LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
+
 		# Saving the leave request info
 		leaveUpdForm.save()
 		return leaveUpdForm

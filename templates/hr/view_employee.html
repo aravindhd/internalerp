@@ -139,11 +139,24 @@ function toggleProfile(value){
               {% url 'employee_update' id=empInfo.id as empUrl %}
               {% url 'employee_delete' id=empInfo.id as empDeleteUrl %}
               <span class="pull-right">
-                {% if "empInfo" not in request.path %}
-                <a href="{{ empUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
-                <!--a href="" data-original-title="Remove this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-danger">Delete</a-->
+                {% if perms.hr.change_employeesdirectory %}
+                    <a href="{{ empUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
                 {% endif %}
-                <a href="{% url 'employees_list' %}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+                {% if perms.hr.delete_employeesdirectory %}
+                    <a href="" data-original-title="Remove this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-danger">Delete</a>                    
+                {% endif %}
+                {% if user.employeesdirectory.role != 'EMPLOYEE' %}
+                    {% if request.path == '/' %}
+                    {% elif request.path == '/hr/empInfo/' %}
+                    {% else %}
+                      {% if user.employeesdirectory.is_manager %}
+                          {% url 'employees_list_per_manager' as backUrl %}
+                      {% else %}
+                          {% url 'employees_list' as backUrl %}
+                      {% endif %}
+                      <a href="{{ backUrl }}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+                    {% endif %}
+                {% endif %}
               </span>
             </div>
           </div>

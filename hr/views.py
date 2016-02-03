@@ -3,7 +3,8 @@ from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.db.models import Q
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from django.forms import inlineformset_factory, modelformset_factory
 from .models import Country, Organization, Holidays
@@ -13,7 +14,7 @@ from .forms import employeeForm, leaveRequestForm, leaveEditForm, leaveAccuralFo
 from .tables import EmployeesTable
 from django_tables2 import RequestConfig
 import csv
-from utils.mails import _process_mail_for_leave_request
+from utils.mails import _process_mail_for_leave_request, _process_mail_for_leave_approved_rejected
 
 # Create your views here.
 def country_configure(request):
@@ -61,9 +62,13 @@ def organization_list(request):
 	context = { "orgList" : orgList }
 	return render(request, 'hr/organizations.html', context)
 
+@permission_required('hr.view_holidays', raise_exception=True)
 def view_holidays(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
+
+	print(request.user.has_perm('hr.view_holidays'))
+
 	holidaysList = Holidays.objects.all()
 	context = { "holidaysList" : holidaysList }
 	return render(request, 'hr/holidays.html', context)
@@ -94,6 +99,7 @@ def employees_table(request):
 	context = { 'empList' : empTable }
 	return render(request, 'hr/employees_table.html', context)
 
+@permission_required('hr.view_employeesdirectory', raise_exception=True)
 def employees_list(request):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -128,6 +134,45 @@ def employees_list(request):
 	context = { 'empList' : empList } #, 'managersList' : managersList }
 	return render(request, 'hr/employees.html', context)
 
+@permission_required('hr.view_employeesdirectory', raise_exception=True)
+def employees_list_per_manager(request):
+	#if not request.user.is_staff or not request.user.is_superuser:
+	#	raise Http404
+
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	mgr = EmployeesDirectory.objects.filter(user=request.user)
+	if mgr.count() > 0 :
+		empList = EmployeesDirectory.objects.filter(manager=mgr)
+	
+	searchQuery = request.GET.get("searchQueryStr")
+	if searchQuery:
+		empList = empList.filter(
+			Q(firstname__icontains=searchQuery) |
+			Q(lastname__icontains=searchQuery) |
+			Q(designation__icontains=searchQuery) |
+			Q(employee_id__icontains=searchQuery) |
+			Q(email__icontains=searchQuery)
+			#Q(user__last_name__icontains=searchQuery)
+			)
+	else:
+		pass
+		
+	paginator = Paginator(empList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
+	page = request.GET.get("page")
+	try:
+		empList = paginator.page(page)
+	except PageNotAnInteger:
+		empList = paginator.page(1)
+    #except EmptyPage:
+    #    empList = paginator.page(paginator.num_pages)
+    
+	context = { 'empList' : empList } #, 'managersList' : managersList }
+	return render(request, 'hr/employees.html', context)
+
+@permission_required('hr.view_employeesdirectory', raise_exception=True)
+@permission_required('hr.view_leaveaccurals', raise_exception=True)
 def employee_details(request, id):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -161,6 +206,7 @@ def employee_info(request):
 	context = { 'empInfo' : empInfo, 'leaveAccuralList' : leaveAccuralList }
 	return render(request, 'hr/view_employee.html', context)
 
+@permission_required('hr.add_employeesdirectory', raise_exception=True)
 def employee_create(request):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -171,12 +217,15 @@ def employee_create(request):
 		lAccForm = leaveAccuralForm(request.POST or None)
 		if empForm.is_valid() and lAccForm.is_valid():
 			empData = empForm.cleaned_data
+			
 			## Create a user account first with given firstname & lastname 
 			## then proceed for creating Employee details
 			username = '%s%s' %(empData['firstname'], empData['lastname'][0])
 			user = User.objects.create_user(username.lower(), empData['email'], settings.DEFAULT_USER_ACCOUNT_PASSWD)
 			user.first_name=empData['firstname']
 			user.last_name=empData['lastname']
+			empGroup, created = Group.objects.get_or_create(name=empData['role'], defaults={ 'name' : empData['role'] })
+			user.groups.add(empGroup)
 			user.save()
 
 			# Creating Employee record
@@ -192,7 +241,7 @@ def employee_create(request):
 			lAcc = instance.leaveaccurals_set.create(leaveType='WFH',accuredLeaves=data['wfh'])
 			lAcc = instance.leaveaccurals_set.create(leaveType='LOP',accuredLeaves=data['lop'])
 			lAcc = instance.leaveaccurals_set.create(leaveType='COMP',accuredLeaves=data['compoff'])
-			
+
 			return redirect('employee_details', id=instance.id)
 		else:	# Form has errors
 			print("Invalid New Employee FORM......")
@@ -207,6 +256,7 @@ def employee_create(request):
 	}
 	return render(request, 'hr/new_employee.html', context)
 
+@permission_required('hr.change_employeesdirectory', raise_exception=True)
 def employee_update(request, id):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -276,6 +326,7 @@ def employee_update(request, id):
 	}
 	return render(request, 'hr/edit_employee.html', context)
 
+@permission_required('hr.delete_employeesdirectory', raise_exception=True)
 def employee_delete(request, id):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -289,6 +340,7 @@ def employee_delete(request, id):
 	context = { 'empInfo' : empInfo }
 	return render(request, 'hr/view_employee.html', context)
 
+@permission_required('hr.add_leaveaccurals', raise_exception=True)
 def leaves_allocate(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
@@ -363,6 +415,7 @@ def leaves_allocate(request):
 	context = { 'lAccForm' : lAccForm, 'csvForm':csvForm }
 	return render(request, 'hr/leaves_allocate.html', context)
 
+@permission_required('hr.view_leaves', raise_exception=True)
 def leaves_list(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
@@ -378,6 +431,32 @@ def leaves_list(request):
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)		
 
+@permission_required('hr.view_leaves', raise_exception=True)
+def leaves_list_per_manager(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	mgr = EmployeesDirectory.objects.filter(user=request.user)
+	leavesList = Leaves.objects.filter(employee_id__manager=mgr)
+	#empList = EmployeesDirectory.objects.all()
+	searchQuery = request.GET.get("searchQueryStr")
+	if searchQuery:
+		leavesList = leavesList.filter(
+			Q(reason__icontains=searchQuery) |
+			Q(currentProject__icontains=searchQuery)
+			)
+	context = { 'leavesList' : leavesList }
+	return render(request, 'hr/leaves.html', context)
+
+#@permission_required('hr.view_leaves', raise_exception=True)
+def leave_details(request, id):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	leaveInfo = Leaves.objects.get(pk=id)
+	context = { 'leaveInfo' : leaveInfo }
+	return render(request, 'hr/leave_details.html', context)
+
+#@permission_required('hr.view_leaves', raise_exception=True)
 def employee_leaves(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
@@ -387,6 +466,7 @@ def employee_leaves(request):
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)		
 
+@permission_required('hr.add_leaves', raise_exception=True)
 def leave_create(request):
 	#if not request.user.is_staff or not request.user.is_superuser:
 	#	raise Http404
@@ -426,13 +506,7 @@ def leave_create(request):
 	}
 	return render(request, 'hr/leave_request.html', context)
 
-def leave_details(request, id):
-	if not request.user.is_authenticated():
-		return redirect('auth_login')
-	leaveInfo = Leaves.objects.get(pk=id)
-	context = { 'leaveInfo' : leaveInfo }
-	return render(request, 'hr/leave_details.html', context)
-
+@permission_required('hr.change_leaves', raise_exception=False)
 def leave_update(request, id):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
@@ -473,6 +547,10 @@ def leave_update(request, id):
 			cleanedData = lForm.cleaned_data
 			instance = lForm.save(commit=False)		# Has Custom FORM save definition
 			
+			# Send EMAIL
+			if instance.status == 'APPROVED' or instance.status == 'REJECTED':
+				_process_mail_for_leave_approved_rejected(instance, 'html')
+
 			return redirect('leaves_list')
 	else:
 		print(">>>>> GET Leave Update:....")

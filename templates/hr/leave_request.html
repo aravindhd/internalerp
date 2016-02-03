@@ -21,7 +21,8 @@
     </fieldset>
 	<div class="buttons-container">
 		<input type="submit" class="btn btn-primary" value="Submit"></input>
-		<button type="button" class="btn btn-warning">Cancel</button>
+    {% url 'employee_info' as cancelUrl %}
+		<button onclick="window.location.href='{{ cancelUrl }}'" type="button" class="btn btn-warning">Cancel</button>
 	</div>
   <!-- Modal -->
   <div id="myModal" class="modal fade" role="dialog">

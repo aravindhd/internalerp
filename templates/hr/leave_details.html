@@ -57,10 +57,19 @@
               </div>
             </div>
             <div>
-              {% url 'leave_update' id=leaveInfo.id as leaveUrl %}
+              
+              {% if user.employeesdirectory.is_manager %}
+                  {% url 'leaves_list_per_manager' as backUrl %}
+              {% elif user.employeesdirectory.role == 'EMPLOYEE' %}
+                  {% url 'employee_leaves' as backUrl %}
+              {% else %}
+                  {% url 'leaves_list' as backUrl %}
+              {% endif %}
+              
+              {% url 'leave_update' id=leaveInfo.id as editUrl %}
               <span class="pull-right">
-                <a href="{{ leaveUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
-                <a href="{% url 'leaves_list' %}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+                <a href="{{ editUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{{ backUrl }}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
               </span>
             </div>
           </div>

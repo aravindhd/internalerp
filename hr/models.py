@@ -15,6 +15,11 @@ def upoad_location(instance, filename):
 class Country(models.Model):
 	country_code = models.CharField(blank=False, max_length=3)
 	country_desc = models.CharField(blank=False,max_length=100)
+	class Meta:
+		permissions = (
+            ('view_country', 'View Country'),
+        )
+
 	def __unicode__(self):
 		return '%s' % (self.country_desc)
 
@@ -24,6 +29,10 @@ class Organization(models.Model):
 	#address = models.CharField(max_length=254)
 	country = models.ForeignKey(Country)
 	is_headoffice = models.BooleanField(default=False)
+	class  Meta:
+		permissions = (
+            ('view_organization', 'View Organization'),
+        )
 	def __unicode__(self):
 		return '%s' % (self.name)
 
@@ -38,7 +47,7 @@ class EmployeesDirectory(models.Model):
 	designation = models.CharField(max_length=100)
 	manager = models.ForeignKey("self", null=True,blank=True)
 	is_manager = models.BooleanField(default=False)
-	#role = models.IntegerField(default=0)
+	role = models.CharField(max_length=25, choices=settings.USER_GROUP_CHOICES, default=settings.DEFAULT_USER_GROUP_CHOICE)
 	user = models.OneToOneField('auth.user', on_delete=models.CASCADE)
 	image = models.FileField(upload_to=upoad_location, null=True,blank=True)
 	def __unicode__(self):
@@ -49,6 +58,10 @@ class EmployeesDirectory(models.Model):
 		return "%s %s" % (self.firstname, self.lastname)
 	class Meta:
 		ordering = ["firstname", "lastname"]
+		permissions = (
+            ('view_employeesdirectory', 'View Employees'),
+            ('view_employee_info', 'View Employee Info'),
+        )
 
 class Department(models.Model):
 	hod = models.ForeignKey(EmployeesDirectory)
@@ -67,12 +80,21 @@ class LeaveAccurals(models.Model):
 	leaveType = models.CharField(max_length=25, choices=settings.LEAVE_TYPE_CHOICES, default=settings.DEFAULT_LEAVE_TYPE)
 	accuredLeaves = models.DecimalField(max_digits=4,decimal_places=2,default=0)
 	last_update_timestamp = models.DateTimeField(auto_now=True,auto_now_add=False)
+	class Meta:
+		permissions = (
+            ('view_leaveaccurals', 'View Leave Accural Info'),
+            ('edit_leaveaccurals', 'Edit Leave Accural Details'),
+        )
 
 class Holidays(models.Model):
 	description = models.CharField(max_length=254, blank=False)
 	date = models.DateField(auto_now=False, auto_now_add=False)
 	country = models.ForeignKey(Country)
 	year = models.IntegerField(choices=YEAR_CHOICES, default=datetime.datetime.now().year)
+	class Meta:
+		permissions = (
+            ('view_holidays', 'View Holidays'),
+        )
 	def __unicode__(self):
 		return '%s' % (self.description)
 
@@ -90,7 +112,10 @@ class Leaves(models.Model):
 	currentProject = models.CharField(max_length=254)
 	creation_timestamp = models.DateTimeField(auto_now=False,auto_now_add=True)
 	last_update_timestamp = models.DateTimeField(auto_now=True,auto_now_add=False)
-
+	class Meta:
+		permissions = (
+            ('view_leaves', 'View Leaves'),
+        )
 	def __str__(self):
 		return "%s - %s [%s]" %(self.leaveType, self.reason, self.status)
 		

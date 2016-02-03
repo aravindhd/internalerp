@@ -88,6 +88,10 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -140,7 +144,7 @@ ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, us
 REGISTRATION_AUTO_LOGIN = True # Automatically log the user in.
 #REGISTRATION_EMAIL_HTML = True
 REGISTRATION_DEFAULT_FROM_EMAIL = 'noreply@embedur.com'
-LOGIN_REDIRECT_URL = '/hr/'  # The page you want users to arrive at after they successful log in
+LOGIN_REDIRECT_URL = '/hr/empInfo/'  # The page you want users to arrive at after they successful log in
 LOGIN_URL = '/accounts/login/'  # The page users are directed to if they are not logged in, and are trying to access pages requiring authentication
 
 # Static files (CSS, JavaScript, Images)
@@ -169,10 +173,22 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 #    except:
 #        pass
 
+# GUARDIAN App specific
+ANONYMOUS_USER_ID = -1
+
 # HR APP SPECIFIC settings ####
 MAIL_ENABLE = True
 
 DEFAULT_USER_ACCOUNT_PASSWD = "Christy94538"
+
+USER_GROUP_CHOICES = (
+    ('EMPLOYEE', 'Employee'),
+    ('MANAGER', 'Manager'),
+    ('HR-MANAGER', 'HR Manager'),
+    ('HR-EXECUTIVE', 'HR Executive'),
+)
+
+DEFAULT_USER_GROUP_CHOICE = 'EMPLOYEE'
 
 DEFAULT_PAGINATOR_RECORDS_PERPAGE = 10
 
