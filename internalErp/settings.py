@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     'bootstrapform',
     'registration',
     'django_tables2',
+    'inplaceeditform_bootstrap',  # it is very important that this app is before that inplaceeditform and inplaceeditform_extra_fields
+    'inplaceeditform',
+    'inplaceeditform_extra_fields',  # this is optional but recommended
+    'bootstrap3_datetime', # this is optional but recommended
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -172,6 +176,33 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 #                globals()[attr] = getattr(settings, attr)
 #    except:
 #        pass
+
+# INPLACE-EDIT Module related
+# Optional, but recommended
+ADAPTOR_INPLACEEDIT = {}
+if 'inplaceeditform_extra_fields' in INSTALLED_APPS:
+    ADAPTOR_INPLACEEDIT['tiny'] = 'inplaceeditform_extra_fields.fields.AdaptorTinyMCEField'
+    # You can add the other adaptors of inplaceeditform_extra_fields
+    # https://pypi.python.org/pypi/django-inplaceedit-extra-fields#installation
+if 'bootstrap3_datetime' in INSTALLED_APPS:
+    ADAPTOR_INPLACEEDIT['date'] = 'inplaceeditform_bootstrap.fields.AdaptorDateBootStrapField'
+    ADAPTOR_INPLACEEDIT['datetime'] = 'inplaceeditform_bootstrap.fields.AdaptorDateTimeBootStrapField'
+
+INPLACEEDIT_EDIT_TOOLTIP_TEXT = 'Please doubleclick to edit'
+INPLACEEDIT_EDIT_EMPTY_VALUE = 'Double click to edit'
+INPLACEEDIT_AUTO_SAVE = True
+INPLACEEDIT_EVENT = "dblclick"
+INPLACEEDIT_DISABLE_CLICK = True  # For inplace edit text into a link tag
+INPLACEEDIT_EDIT_MESSAGE_TRANSLATION = 'Write a translation' # transmeta option
+INPLACEEDIT_SUCCESS_TEXT = 'Successfully saved'
+INPLACEEDIT_UNSAVED_TEXT = 'You have unsaved changes'
+INPLACE_ENABLE_CLASS = 'enable'
+DEFAULT_INPLACE_EDIT_OPTIONS = {} # dictionnary of the optionals parameters that the templatetag can receive to change its behavior (see the Advanced usage section)
+DEFAULT_INPLACE_EDIT_OPTIONS_ONE_BY_ONE = True # modify the behavior of the DEFAULT_INPLACE_EDIT_OPTIONS usage, if True then it use the default values not specified in your template, if False it uses these options only when the dictionnary is empty (when you do put any options in your template)
+ADAPTOR_INPLACEEDIT_EDIT = 'hr.perms.MyAdaptorEditInline' # Explain in Permission Adaptor API
+#ADAPTOR_INPLACEEDIT = {'myadaptor': 'app_name.fields.MyAdaptor'} # Explain in Adaptor API
+INPLACE_GET_FIELD_URL = None # to change the url where django-inplaceedit use to get a field
+INPLACE_SAVE_URL = None # to change the url where django-inplaceedit use to save a field
 
 # GUARDIAN App specific
 ANONYMOUS_USER_ID = -1

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<SECTION class="content">
+	
+<div class="table-responsive container"> 
+	<legend>Countries</legend>
+    <form method="GET" action=''>
+	<div class="panel-body">
+        <table id="myTable" class="table table-fixedheader table-hover">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th width="49%">Country Code</th>
+                    <th width="49%">Name</th>                    
+                </tr>
+            </thead>
+            <tbody style="height:200px">
+                {% for country in countryList %}
+                <tr>
+                    <td width="2%">{{ country.id }}</td>
+                    <td width="49%">{{ country.country_code }}</td>
+                    <td width="49%">{{ country.country_desc }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>    
+  </div>	
+</SECTION>
+{% endblock content %}

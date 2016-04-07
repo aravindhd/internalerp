@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<SECTION class="content">
+  
+<div class="table-responsive container"> 
+  <legend>Holidays</legend>
+    <form method="GET" action=''>
+  <div class="panel-body">
+        <table id="myTable" class="table table-fixedheader table-hover">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th width="24%">Description</th>
+                    <th width="24%">Country</th>                    
+                    <th width="24%">Date</th>                    
+                    <th width="24%">Year</th>                    
+                </tr>
+            </thead>
+            <tbody style="height:200px">
+                {% for holiday in holidaysList %}
+                <tr>
+                    <td width="2%">{{ holiday.id }}</td>
+                    <td width="24%">{{ holiday.description }}</td>
+                    <td width="24%">{{ holiday.country }}</td>
+                    <td width="24%">{{ holiday.date }}</td>
+                    <td width="24%">{{ holiday.year }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>    
+  </div>  
+</SECTION>
+{% endblock content %}

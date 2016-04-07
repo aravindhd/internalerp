@@ -35,6 +35,11 @@ urlpatterns = [
     url(r'^hr/', include('hr.urls')),
     url(r'^$', include('hr.urls')),
     #url(r'^$', include('<appname>.views.<viewName>')),
+    #...#
+
+    url(r'^inplaceeditform/', include('inplaceeditform.urls')),
+
+    #...#
 ]
 
 if settings.DEBUG:

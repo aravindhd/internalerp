@@ -27,7 +27,13 @@
             </thead>
             <tbody style="height:200px">
                 {% for leave in leavesList %}
-                {% url 'leave_details' id=leave.id as leaveUrl %}
+                {% if user.employeesdirectory.is_manager %}
+                  {% url 'leave_update' id=leave.id as leaveUrl %}
+                {% elif user.employeesdirectory.role == 'EMPLOYEE' %}
+                  {% url 'leave_details' id=leave.id as leaveUrl %}
+                {% else %}
+                  {% url 'leaves_details' as backUrl %}
+                {% endif %}
                 <tr onclick="document.location='{{ leaveUrl }}'">
                     <td width="3%">{{ leave.id }}</td>
                     <td width="20%">{{ leave.employee_id }}</td>

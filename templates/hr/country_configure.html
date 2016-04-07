@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load staticfiles %}
+{% load bootstrap %}
+<script src="{% static 'js/date-picker.js' %}"></script>
+<link href="{% static 'css/date-picker.css' %}" rel="stylesheet">
+<script>
+  $(function() {
+    //alert("Trying the Date Widget...");
+    $( ".date_picker" ).datepicker({ format: "yyyy-mm-dd" });
+  });
+</script>
+<SECTION class="content">
+<form class="form-horizontal" role="form" method="POST" action="">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Configure Country</legend>
+        {{ countryForm|bootstrap_horizontal }}
+    </fieldset>
+	<div class="buttons-container">
+		<input type="submit" class="btn btn-primary" value="Submit"></input>
+		<button type="button" class="btn btn-warning">Cancel</button>
+	</div>
+</form>
+	
+</SECTION>
+{% endblock content %}

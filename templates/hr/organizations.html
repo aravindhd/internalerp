@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<SECTION class="content">
+    
+<div class="table-responsive container"> 
+    <legend>Organizations</legend>
+    <form method="GET" action=''>
+    <div class="panel-body">
+        <table id="myTable" class="table table-fixedheader table-hover">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th width="24%">Name</th>
+                    <th width="24%">Location</th>
+                    <th width="24%">Country</th>
+                    <th width="24%">Is HeadOffice</th>
+                </tr>
+            </thead>
+            <tbody style="height:200px">
+                {% for org in orgList %}
+                <tr>
+                    <td width="2%">{{ org.id }}</td>
+                    <td width="24%">{{ org.name }}</td>
+                    <td width="24%">{{ org.location }}</td>
+                    <td width="24%">{{ org.country }}</td>
+                    <td width="24%">{{ org.is_headoffice }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>    
+  </div>    
+</SECTION>
+{% endblock content %}
