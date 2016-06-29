@@ -80,7 +80,7 @@ def create_mailbody_for_leave_request(leaveObj):
 					  leaveObj.reason) 
 	return body
 
-def create_mailbody_for_leave_Approved_rejected(leaveObj):
+def create_mailbody_for_leave_approved_rejected(leaveObj):
 	if leaveObj.status == "APPROVED":
 		status = "APPROVED"
 	elif leaveObj.status == "REJECTED":

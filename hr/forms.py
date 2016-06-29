@@ -107,9 +107,9 @@ class leaveRequestForm(forms.ModelForm):
 		numDays = self.cleaned_data.get('numberOfDays')
 		empAccBalance = LeaveAccurals.objects.get(employee=emp, leaveType=lType).accuredLeaves
 		if lType == 'LOP':
-			newAccLeaveBalance = Decimal(empAccBalance) - Decimal(numDays)
-		else:
 			newAccLeaveBalance = Decimal(empAccBalance) + Decimal(numDays)
+		else:
+			newAccLeaveBalance = Decimal(empAccBalance) - Decimal(numDays)
 
 		LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccLeaveBalance)
 		
@@ -284,7 +284,7 @@ class leaveAccuralForm(forms.Form):
 	cl = forms.DecimalField(label='Casual Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
 	sl = forms.DecimalField(label='Sick Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
 	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,)
-	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=3,max_digits=4,decimal_places=2,)
+	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,)
 	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,)
 
 class singleEmployeeLeaveAccuralForm(forms.Form):
@@ -293,7 +293,7 @@ class singleEmployeeLeaveAccuralForm(forms.Form):
 	cl = forms.DecimalField(label='Casual Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
 	sl = forms.DecimalField(label='Sick Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
 	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,initial=0)
-	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=3,max_digits=4,decimal_places=2,initial=0)
+	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,initial=0)
 	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,initial=0)
 
 class csvImportLeaveAccuralForm(forms.Form):
