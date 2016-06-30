@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'inplaceeditform',
     'inplaceeditform_extra_fields',  # this is optional but recommended
     'bootstrap3_datetime', # this is optional but recommended
-    'django_cron',   # this is for scheduled tasks such as Notification Emails to Managers
+    'django_crontab',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -141,9 +141,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-CRON_CLASSES = [
-    #"demo.cron.EmailUsercountCronJob",
-    'utils.cron.EmailSendCronJob',
+CRONJOBS = [
+    ('*/2 * * * *', 'utils.cron.SendLeavesToApproveEmail', '>> /tmp/scheduled_job.log')
 ]
 
 # Deployment
@@ -160,6 +159,7 @@ EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 '''
 DEFAULT_FROM_EMAIL = 'noreply@embedur.com'
+DEFAULT_CC_EMAIL = 'noreply@embedur.com'
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, use a different value.
 REGISTRATION_AUTO_LOGIN = True # Automatically log the user in.
