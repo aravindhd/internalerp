@@ -218,9 +218,12 @@ def employee_create(request):
 		if empForm.is_valid() and lAccForm.is_valid():
 			empData = empForm.cleaned_data
 			
-			## Create a user account first with given firstname & lastname 
+			## Create a user account first with given email alias else firstname & lastname 
 			## then proceed for creating Employee details
-			username = '%s%s' %(empData['firstname'], empData['lastname'][0])
+			username = '%s' % (empData['email'].split('@')[0])
+			if len(username) <= 0 :
+				print("Email Alias not available so creating based on firstname, lastname....")
+				username = '%s%s' %(empData['firstname'], empData['lastname'][0])
 			user = User.objects.create_user(username.lower(), empData['email'], settings.DEFAULT_USER_ACCOUNT_PASSWD)
 			user.first_name=empData['firstname']
 			user.last_name=empData['lastname']

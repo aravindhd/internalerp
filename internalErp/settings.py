@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'inplaceeditform',
     'inplaceeditform_extra_fields',  # this is optional but recommended
     'bootstrap3_datetime', # this is optional but recommended
+    'django_cron',   # this is for scheduled tasks such as Notification Emails to Managers
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -139,6 +140,11 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+CRON_CLASSES = [
+    #"demo.cron.EmailUsercountCronJob",
+    'utils.cron.EmailSendCronJob',
+]
 
 # Deployment
 
