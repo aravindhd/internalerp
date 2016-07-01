@@ -142,7 +142,7 @@ USE_L10N = True
 USE_TZ = True
 
 CRONJOBS = [
-    ('*/2 * * * *', 'utils.cron.SendLeavesToApproveEmail', '>> /tmp/scheduled_job.log')
+    ('0 15 * * *', 'utils.cron.SendLeavesToApproveEmail', '>> /tmp/scheduled_job.log')
 ]
 
 # Deployment
