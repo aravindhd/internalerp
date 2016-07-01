@@ -15,7 +15,7 @@ from django.core.wsgi import get_wsgi_application
 sys.path.append('/home/embeduradmin/eur-internal/internalerp')
 
 # add the virtualenv site-packages path to the sys.path
-sys.path.append('/home/embeduradmin/eur-internal/lib/site-packages')
+sys.path.append('/home/embeduradmin/eur-internal/lib/python2.7/site-packages')
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "internalErp.settings")
