@@ -54,9 +54,17 @@
                 {% elif user.employeesdirectory.role == 'EMPLOYEE' %}
                   {% url 'leave_details' id=leave.id as leaveUrl %}
                 {% else %}
+                  {% url 'leave_details' id=leave.id as leaveUrl %}
                   {% url 'leaves_details' as backUrl %}
                 {% endif %}
+                {% url 'leave_details' id=leave.id as leaveDetailsUrl %}
+                {% if leave.status == 'CLOSED' %}
+                <tr onclick="document.location='{{ leaveDetailsUrl }}'">
+                {% elif leave.employee_id == user.employeesdirectory %}
+                <tr onclick="document.location='{{ leaveDetailsUrl }}'">
+                {% else %}
                 <tr onclick="document.location='{{ leaveUrl }}'">
+                {% endif %}
                     <td width="3%">{{ leave.id }}</td>
                     <td width="20%">{{ leave.employee_id }}</td>
                     <td width="7%">{{ leave.leaveType }}</td>
