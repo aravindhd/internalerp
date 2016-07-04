@@ -7,7 +7,7 @@ def SendLeavesToApproveEmail():
     Send email to Managers about the pending leaves to approve/reject
     '''
     ccList = []
-    ccList.append(settings.DEFAULT_CC_EMAIL)
+    ccList.append(settings.DEFAULT_LEAVES_EMAIL)
     mgrList = EmployeesDirectory.objects.filter(is_manager=True)
     for mgr in mgrList:
         sendMail = False

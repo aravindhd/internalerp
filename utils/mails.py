@@ -10,7 +10,7 @@ import inspect
 
 def create_and_send_html_email(subject, mailBody, useDefaultFrom, toList, ccList):
 	funcName = inspect.stack()[0][3]
-	bccList = ['noreply@embedur.com']
+	bccList = [settings.DEFAULT_CC_EMAIL]
 
 	# Working Code Disabling Mail Capability for development
 	if settings.MAIL_ENABLE:
@@ -27,7 +27,7 @@ def create_and_send_html_email(subject, mailBody, useDefaultFrom, toList, ccList
 
 def create_and_send_text_email(subject, mailBody, useDefaultFrom, toList, ccList):
 	funcName = inspect.stack()[0][3]
-	bccList = ['noreply@embedur.com']
+	bccList = [settings.DEFAULT_CC_EMAIL]
 
 	# Working Code Disabling Mail Capability for development
 	if settings.MAIL_ENABLE:
@@ -116,7 +116,7 @@ def create_toList_for_leave_request(leaveObj):
 	if leaveObj.employee_id.manager:
 		toList.append(leaveObj.employee_id.manager.email)
 	else:
-		toList.append('venkateshm@embedur.com')
+		toList.append(settings.DEFAULT_LEAVES_EMAIL)
 
 	# Need to add if any required in future
 	return toList
@@ -133,7 +133,7 @@ def create_ccList_for_leave_request(leaveObj):
 	ccList.append(leaveObj.employee_id.email)
 	# Need to add if any required in future say HR Admin role i.e. Venkatesh
 	if leaveObj.employee_id.manager:
-		ccList.append('venkateshm@embedur.com')
+		ccList.append(settings.DEFAULT_LEAVES_EMAIL)
 	else:
 		pass
 	return ccList
@@ -143,7 +143,7 @@ def create_ccList_for_leave_approved_rejected(leaveObj):
 	# Need to add if any required in future say HR Admin role i.e. Venkatesh
 	if leaveObj.employee_id.manager:
 		ccList.append(leaveObj.employee_id.manager.email)
-	ccList.append('venkateshm@embedur.com')
+	ccList.append(settings.DEFAULT_LEAVES_EMAIL)
 	return ccList
 
 def _process_mail_for_leave_request(leaveObj, mailContentType):

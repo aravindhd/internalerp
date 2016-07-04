@@ -134,7 +134,7 @@ class leaveRequestForm(forms.ModelForm):
 		}
 		labels = {
             'employee_id': 'Employee',
-            'leaveType': 'Leave Type',
+            'leaveType': 'Category',
             'reason' : 'Reason',
             'startedDate' : 'Date From',
             'endDate' : 'Date To',

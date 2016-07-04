@@ -2,6 +2,14 @@
 
 {% block content %}
 {% load staticfiles %}
+<script src="{% static 'js/date-picker.js' %}"></script>
+<link href="{% static 'css/date-picker.css' %}" rel="stylesheet">
+<script>
+  $(function() {
+    //alert("Trying the Date Widget...");
+    $( ".date_picker" ).datepicker({ format: "yyyy-mm-dd" });
+  });
+</script>
 <SECTION class="content">
 	
 <div class="table-responsive container"> 
@@ -9,7 +17,10 @@
     <form method="GET" action=''>
 	<div class="search-box">
 		<label for="name" class="control-label">Leave Info</label>
-		<input type="text" name="searchQueryStr" class="form-control" placeholder="Search" value="{{ request.GET.searchQueryStr }}" />
+		<input type="text" name="searchQueryStr" style="width: 20%;" class="form-control" placeholder="Search" value="{{ request.GET.searchQueryStr }}" />
+        <input type="text" name="searchQueryStartDate" style="width: 10%;" class="form-control date_picker" placeholder="Start date" value="{{ request.GET.searchQueryStartDate }}" />
+        <input type="text" name="searchQueryEndDate" style="width: 10%;" class="form-control date_picker" placeholder="End date" value="{{ request.GET.searchQueryEndDate }}" />
+        <input type="submit" class="btn btn-primary" value="Search"></input>
 	</div>
     <div class="panel-body">
         <table id="myTable" class="table table-fixedheader table-hover">
@@ -17,7 +28,7 @@
                 <tr>
                     <th width="3%">#</th>
                     <th width="20%">Employee Name</th>
-                    <th width="7%">Leave Type</th>
+                    <th width="7%">Category</th>
                     <th width="33%">Reason</th>
                     <th width="10%">Start Date</th>
                     <th width="10%">End Date</th>

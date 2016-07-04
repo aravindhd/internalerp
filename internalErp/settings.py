@@ -160,6 +160,7 @@ EMAIL_USE_TLS = False
 '''
 DEFAULT_FROM_EMAIL = 'noreply@embedur.com'
 DEFAULT_CC_EMAIL = 'noreply@embedur.com'
+DEFAULT_LEAVES_EMAIL = 'HRIndia@embedur.com'
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, use a different value.
 REGISTRATION_AUTO_LOGIN = True # Automatically log the user in.
@@ -238,7 +239,8 @@ USER_GROUP_CHOICES = (
 
 DEFAULT_USER_GROUP_CHOICE = 'EMPLOYEE'
 
-DEFAULT_PAGINATOR_RECORDS_PERPAGE = 10
+# TODO: Modify this value in future according to CSS Bootstrap value in UI
+DEFAULT_PAGINATOR_RECORDS_PERPAGE = 6
 
 EMPLOYMENT_TYPE_CHOICES = (
     ('PE', 'Permanent'),

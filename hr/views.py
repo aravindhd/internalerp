@@ -128,9 +128,8 @@ def employees_list(request):
 		empList = paginator.page(page)
 	except PageNotAnInteger:
 		empList = paginator.page(1)
-    #except EmptyPage:
-    #    empList = paginator.page(paginator.num_pages)
-    
+	except EmptyPage:
+		empList = paginator.page(paginator.num_pages)
 	context = { 'empList' : empList } #, 'managersList' : managersList }
 	return render(request, 'hr/employees.html', context)
 
@@ -428,8 +427,26 @@ def leaves_list(request):
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
-			Q(reason__icontains=searchQuery) |
-			Q(currentProject__icontains=searchQuery)
+			Q(reason__icontains=searchQuery)
+			| Q(currentProject__icontains=searchQuery)
+			| Q(employee_id__firstname__icontains=searchQuery)
+			#| Q(employee_id__lastname__icontains=searchQuery)
+			| Q(leaveType__icontains=searchQuery)
+			| Q(status__icontains=searchQuery)
+			)
+	startDateSearch = request.GET.get("searchQueryStartDate")
+	if startDateSearch:
+		#print("Start Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(startedDate__icontains=startDateSearch)
+			Q(startedDate__gte=startDateSearch)
+			)
+	endDateSearch = request.GET.get("searchQueryEndDate")
+	if endDateSearch:
+		#print("End Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(endDate__icontains=endDateSearch)
+			Q(endDate__lte=endDateSearch)
 			)
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)		
@@ -445,8 +462,26 @@ def leaves_list_per_manager(request):
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
-			Q(reason__icontains=searchQuery) |
-			Q(currentProject__icontains=searchQuery)
+			Q(reason__icontains=searchQuery)
+			| Q(currentProject__icontains=searchQuery)
+			| Q(employee_id__firstname__icontains=searchQuery)
+			#| Q(employee_id__lastname__icontains=searchQuery)
+			| Q(leaveType__icontains=searchQuery)
+			| Q(status__icontains=searchQuery)
+			)
+	startDateSearch = request.GET.get("searchQueryStartDate")
+	if startDateSearch:
+		#print("Start Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(startedDate__icontains=startDateSearch)
+			Q(startedDate__gte=startDateSearch)
+			)
+	endDateSearch = request.GET.get("searchQueryEndDate")
+	if endDateSearch:
+		#print("End Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(endDate__icontains=endDateSearch)
+			Q(endDate__lte=endDateSearch)
 			)
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)

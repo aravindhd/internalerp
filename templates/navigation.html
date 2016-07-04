@@ -46,7 +46,7 @@
 							{% if perms.hr.view_leaves %}
 								{% if user.employeesdirectory.is_manager %}
 									<li><a href="#" onclick="document.location='{{ leavesPerMgrUrl }}'">Leave Summary</a></li>
-								{% else %}
+								{% elif user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
 									<li><a href="#" onclick="document.location='{{ leavesUrl }}'">Leave Summary</a></li>
 								{% endif %}
 							{% endif %}
@@ -70,9 +70,10 @@
 						aria-haspopup="true" aria-expanded="false">Configure<span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a href="#" onclick="document.location='{{newCountryUrl}}'">Add Country</a></li>
+							<li><a href="#" onclick="document.location='{{newOrgUrl}}'">Add Organization</a><li><a href="#" onclick="document.location='{{newHolidayUrl}}'">Add Holiday</a></li>
 							<li><a href="#" onclick="document.location='{{countriesUrl}}'">Countries</a></li>
-							<li><a href="#" onclick="document.location='{{newOrgUrl}}'">Add Organization</a></li><li><a href="#" onclick="document.location='{{orgsUrl}}'">Organizations</a></li>
-							<li><a href="#" onclick="document.location='{{newHolidayUrl}}'">Add Holiday</a></li><li><a href="#" onclick="document.location='{{holidaysUrl}}'">Holidays</a></li>
+							</li><li><a href="#" onclick="document.location='{{orgsUrl}}'">Organizations</a></li>
+							<li><a href="#" onclick="document.location='{{holidaysUrl}}'">Holidays</a></li>
 						</ul>
 					</li>
 					{% endif %}
