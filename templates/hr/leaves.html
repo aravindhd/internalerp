@@ -21,6 +21,17 @@
         <input type="text" name="searchQueryStartDate" style="width: 10%;" class="form-control date_picker" placeholder="Start date" value="{{ request.GET.searchQueryStartDate }}" />
         <input type="text" name="searchQueryEndDate" style="width: 10%;" class="form-control date_picker" placeholder="End date" value="{{ request.GET.searchQueryEndDate }}" />
         <input type="submit" class="btn btn-primary" value="Search"></input>
+        <label class="step-links" style="float:right;display: inline-block; margin-bottom: 5px;font-weight: bold;">
+            {% if leavesList.has_previous %}
+            <a href="?page={{ leavesList.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ leavesList.number }} of {{ leavesList.paginator.num_pages }}
+            </span>
+            {% if leavesList.has_next %}
+            <a href="?page={{ leavesList.next_page_number }}">Next</a>
+            {% endif %}
+        </label>
 	</div>
     <div class="panel-body">
         <table id="myTable" class="table table-fixedheader table-hover">

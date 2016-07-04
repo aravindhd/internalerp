@@ -27,7 +27,9 @@
 						{% url 'employees_list' as employeesUrl %}
 						{% url 'employees_list_per_manager' as empListPerMgr %}
 						{% url 'leaves_list' as leavesUrl %}
+						{% url 'leaves_to_approve' as leavesToApproveUrl %}
 						{% url 'leaves_list_per_manager' as leavesPerMgrUrl %}
+						{% url 'leaves_to_approve_per_manager' as leavesToApprovePerMgrUrl %}
 						{% url 'leave_create' as leaveCreateUrl %}
 						{% url 'employee_leaves' as empLeavesUrl %}
 						{% url 'leaves_allocate' as leavesAllocateUrl %}
@@ -46,8 +48,10 @@
 							{% if perms.hr.view_leaves %}
 								{% if user.employeesdirectory.is_manager %}
 									<li><a href="#" onclick="document.location='{{ leavesPerMgrUrl }}'">Leave Summary</a></li>
+									<li><a href="#" onclick="document.location='{{ leavesToApprovePerMgrUrl }}'">Leaves To Approve</a></li>
 								{% elif user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
 									<li><a href="#" onclick="document.location='{{ leavesUrl }}'">Leave Summary</a></li>
+									<li><a href="#" onclick="document.location='{{ leavesToApproveUrl }}'">Leaves To Approve</a></li>
 								{% endif %}
 							{% endif %}
 							{% if perms.hr.add_leaveaccurals %}

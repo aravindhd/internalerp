@@ -448,6 +448,12 @@ def leaves_list(request):
 			#Q(endDate__icontains=endDateSearch)
 			Q(endDate__lte=endDateSearch)
 			)
+	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
+	page = request.GET.get("page")
+	try:
+		leavesList = paginator.page(page)
+	except PageNotAnInteger:
+		leavesList = paginator.page(1)
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)		
 
@@ -483,8 +489,95 @@ def leaves_list_per_manager(request):
 			#Q(endDate__icontains=endDateSearch)
 			Q(endDate__lte=endDateSearch)
 			)
+	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
+	page = request.GET.get("page")
+	try:
+		leavesList = paginator.page(page)
+	except PageNotAnInteger:
+		leavesList = paginator.page(1)
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)
+
+
+@permission_required('hr.view_leaves', raise_exception=True)
+def leaves_to_approve(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	leavesList = Leaves.objects.filter(status='SUBMITTED')
+	searchQuery = request.GET.get("searchQueryStr")
+	if searchQuery:
+		leavesList = leavesList.filter(
+			Q(reason__icontains=searchQuery)
+			| Q(currentProject__icontains=searchQuery)
+			| Q(employee_id__firstname__icontains=searchQuery)
+			#| Q(employee_id__lastname__icontains=searchQuery)
+			| Q(leaveType__icontains=searchQuery)
+			| Q(status__icontains=searchQuery)
+			)
+	startDateSearch = request.GET.get("searchQueryStartDate")
+	if startDateSearch:
+		#print("Start Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(startedDate__icontains=startDateSearch)
+			Q(startedDate__gte=startDateSearch)
+			)
+	endDateSearch = request.GET.get("searchQueryEndDate")
+	if endDateSearch:
+		#print("End Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(endDate__icontains=endDateSearch)
+			Q(endDate__lte=endDateSearch)
+			)
+	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
+	page = request.GET.get("page")
+	try:
+		leavesList = paginator.page(page)
+	except PageNotAnInteger:
+		leavesList = paginator.page(1)
+	context = { 'leavesList' : leavesList }
+	return render(request, 'hr/leaves.html', context)		
+
+@permission_required('hr.view_leaves', raise_exception=True)
+def leaves_to_approve_per_manager(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	mgr = EmployeesDirectory.objects.filter(user=request.user)
+	leavesList = Leaves.objects.filter(employee_id__manager=mgr).filter(status='SUBMITTED')
+	searchQuery = request.GET.get("searchQueryStr")
+	if searchQuery:
+		leavesList = leavesList.filter(
+			Q(reason__icontains=searchQuery)
+			| Q(currentProject__icontains=searchQuery)
+			| Q(employee_id__firstname__icontains=searchQuery)
+			#| Q(employee_id__lastname__icontains=searchQuery)
+			| Q(leaveType__icontains=searchQuery)
+			| Q(status__icontains=searchQuery)
+			)
+	startDateSearch = request.GET.get("searchQueryStartDate")
+	if startDateSearch:
+		#print("Start Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(startedDate__icontains=startDateSearch)
+			Q(startedDate__gte=startDateSearch)
+			)
+	endDateSearch = request.GET.get("searchQueryEndDate")
+	if endDateSearch:
+		#print("End Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			#Q(endDate__icontains=endDateSearch)
+			Q(endDate__lte=endDateSearch)
+			)
+	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
+	page = request.GET.get("page")
+	try:
+		leavesList = paginator.page(page)
+	except PageNotAnInteger:
+		leavesList = paginator.page(1)
+	context = { 'leavesList' : leavesList }
+	return render(request, 'hr/leaves.html', context)
+
 
 #@permission_required('hr.view_leaves', raise_exception=True)
 def leave_details(request, id):
