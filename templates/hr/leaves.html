@@ -71,7 +71,7 @@
                     <td width="33%">{{ leave.reason }}</td>
                     <td width="10%">{{ leave.startedDate }}</td>
                     <td width="10%">{{ leave.endDate }}</td>
-                    <td width="7%">{{ leave.numberOfDays }}</td>
+                    <td width="7%">{{ leave.numberOfDays|floatformat }}</td>
                     <td width="10%">{{ leave.status }}</td>
                 </tr>
                 {% endfor %}				
@@ -81,3 +81,4 @@
   </div>	
 </SECTION>
 {% endblock content %}
+

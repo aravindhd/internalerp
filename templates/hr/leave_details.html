@@ -41,7 +41,7 @@
 
                         <tr>
                           <td class="field-label">Number of Days</td>
-                          <td>{{ leaveInfo.numberOfDays }}</td>
+                          <td>{{ leaveInfo.numberOfDays|floatformat }}</td>
                         </tr>
                         <tr>
                           <td class="field-label">Reason</td>
@@ -80,3 +80,4 @@
 </div>  
 </SECTION>
 {% endblock content %}
+
