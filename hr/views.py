@@ -435,18 +435,25 @@ def leaves_list(request):
 			| Q(status__icontains=searchQuery)
 			)
 	startDateSearch = request.GET.get("searchQueryStartDate")
-	if startDateSearch:
+        endDateSearch = request.GET.get("searchQueryEndDate")
+	if startDateSearch and endDateSearch:
 		#print("Start Date based search received!!!!!!......")
 		leavesList = leavesList.filter(
-			#Q(startedDate__icontains=startDateSearch)
-			Q(startedDate__gte=startDateSearch)
+			Q(startedDate__range=(startDateSearch, endDateSearch)) |
+                        Q(endDate__range=(startDateSearch, endDateSearch))
 			)
-	endDateSearch = request.GET.get("searchQueryEndDate")
-	if endDateSearch:
+        elif startDateSearch:
+                #print("Start Date based search received!!!!!!......")
+                leavesList = leavesList.filter(
+                        Q(startedDate__lte=startDateSearch) &
+                        Q(endDate__gte=startDateSearch)
+                        )
+	elif endDateSearch:
 		#print("End Date based search received!!!!!!......")
 		leavesList = leavesList.filter(
-			#Q(endDate__icontains=endDateSearch)
-			Q(endDate__lte=endDateSearch)
+			#Q(endDate__exact=endDateSearch)
+                        Q(startedDate__lte=endDateSearch) &
+                        Q(endDate__gte=endDateSearch)
 			)
 	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
 	page = request.GET.get("page")
