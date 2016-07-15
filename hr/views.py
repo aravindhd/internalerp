@@ -472,30 +472,37 @@ def leaves_list_per_manager(request):
 	mgr = EmployeesDirectory.objects.filter(user=request.user)
 	leavesList = Leaves.objects.filter(employee_id__manager=mgr)
 	#empList = EmployeesDirectory.objects.all()
-	searchQuery = request.GET.get("searchQueryStr")
-	if searchQuery:
-		leavesList = leavesList.filter(
-			Q(reason__icontains=searchQuery)
-			| Q(currentProject__icontains=searchQuery)
-			| Q(employee_id__firstname__icontains=searchQuery)
-			#| Q(employee_id__lastname__icontains=searchQuery)
-			| Q(leaveType__icontains=searchQuery)
-			| Q(status__icontains=searchQuery)
-			)
-	startDateSearch = request.GET.get("searchQueryStartDate")
-	if startDateSearch:
-		#print("Start Date based search received!!!!!!......")
-		leavesList = leavesList.filter(
-			#Q(startedDate__icontains=startDateSearch)
-			Q(startedDate__gte=startDateSearch)
-			)
-	endDateSearch = request.GET.get("searchQueryEndDate")
-	if endDateSearch:
-		#print("End Date based search received!!!!!!......")
-		leavesList = leavesList.filter(
-			#Q(endDate__icontains=endDateSearch)
-			Q(endDate__lte=endDateSearch)
-			)
+        searchQuery = request.GET.get("searchQueryStr")
+        if searchQuery:
+                leavesList = leavesList.filter(
+                        Q(reason__icontains=searchQuery)
+                        | Q(currentProject__icontains=searchQuery)
+                        | Q(employee_id__firstname__icontains=searchQuery)
+                        #| Q(employee_id__lastname__icontains=searchQuery)
+                        | Q(leaveType__icontains=searchQuery)
+                        | Q(status__icontains=searchQuery)
+                        )
+        startDateSearch = request.GET.get("searchQueryStartDate")
+        endDateSearch = request.GET.get("searchQueryEndDate")
+        if startDateSearch and endDateSearch:
+                #print("Start Date based search received!!!!!!......")
+                leavesList = leavesList.filter(
+                        Q(startedDate__range=(startDateSearch, endDateSearch)) |
+                        Q(endDate__range=(startDateSearch, endDateSearch))
+                        )
+        elif startDateSearch:
+                #print("Start Date based search received!!!!!!......")
+                leavesList = leavesList.filter(
+                        Q(startedDate__lte=startDateSearch) &
+                        Q(endDate__gte=startDateSearch)
+                        )
+        elif endDateSearch:
+                #print("End Date based search received!!!!!!......")
+                leavesList = leavesList.filter(
+                        #Q(endDate__exact=endDateSearch)
+                        Q(startedDate__lte=endDateSearch) &
+                        Q(endDate__gte=endDateSearch)
+                        )
 	paginator = Paginator(leavesList, settings.DEFAULT_PAGINATOR_RECORDS_PERPAGE)
 	page = request.GET.get("page")
 	try:
