@@ -149,16 +149,17 @@ class leaveEditForm(forms.ModelForm):
 	def __init__(self, userBased_Status_choices, isUserRole, *args, **kwargs):
 		super(leaveEditForm, self).__init__(*args, **kwargs)
 		self.fields['status'].choices = userBased_Status_choices
-		self.fields['leaveType'].widget.attrs['class'] = 'readOnlySelect'
+		#self.fields['leaveType'].widget.attrs['class'] = 'readOnlySelect'
 
 		if isUserRole == 'manager':
+			self.fields['leaveType'].widget.attrs['class'] = 'readOnlySelect'
 			self.fields['startedDate'].widget.attrs['readonly'] = True
 			self.fields['endDate'].widget.attrs['readonly'] = True
 			self.fields['numberOfDays'].widget.attrs['readonly'] = True
 			self.fields['reason'].widget.attrs['readonly'] = True
 		elif isUserRole == 'employee':
 			self.fields['rejection_reason'].widget.attrs['readonly'] = True
-    
+			self.fields['leaveType'].widget.attrs['class'] = 'readOnlySelect'    
 	def clean(self):
 		print(">>>>>> leaveEditForm clean() definition ......")
 		emp = self.cleaned_data.get('employee_id')
@@ -242,7 +243,18 @@ class leaveEditForm(forms.ModelForm):
 				newAccuralBalance = Decimal(empAccBalance) + Decimal(prevNumDays)
 			doAccuralUpdate = True
 		else:
-			pass # Throw error if any states mismatches TODO:
+			#print("......Leave Edit Form......")
+			if (prevLType == 'SL') and (lType != 'SL'):
+				#print("Converting the APPROVED SL leave to Others due to missing Medical Certificate..")
+				empAccBalance_SL = LeaveAccurals.objects.get(employee=emp, leaveType=prevLType).accuredLeaves
+				newAccuralBalance_SL = Decimal(empAccBalance_SL) + Decimal(prevNumDays)
+				newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
+				#print("Updating leave Accural for leave Type : %s with balance %s." % (lType, newAccuralBalance))
+				#print("Updating leave Accural for leave Type : %s with balance %s." % (prevLType, newAccuralBalance_SL))
+				LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
+				LeaveAccurals.objects.filter(employee=emp, leaveType=prevLType).update(accuredLeaves=newAccuralBalance_SL)
+			else:
+				pass # Throw error if any states mismatches TODO:
 
 		if doAccuralUpdate:
 			LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
