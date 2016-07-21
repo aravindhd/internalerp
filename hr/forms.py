@@ -79,12 +79,14 @@ class leaveRequestForm(forms.ModelForm):
 		for holiday in holidays:
 			empHolidays.append(holiday['date'])
 		numberBusinessDays = networkdays(fromDate, endDate, empHolidays)
+		print("Working Days: [%s]" % (Decimal(numberBusinessDays)))
+		print("Num of Days : [%s]" % (Decimal(numDays)))
 		errors = []
 		if endDate < fromDate:
 			err = "[ End date cannot be earlier than start date ]"
 			self._errors["invalid_dates"] = err
 			errors.append(err)
-		if Decimal(numDays) > Decimal(numberBusinessDays):
+		if (Decimal(numDays) > Decimal(numberBusinessDays) or (Decimal(numberBusinessDays) - Decimal(numDays) > 0.5)):
 			err = "[ Provide valid number of days considering weekends and holidays ]"
 			self._errors["invalid_numdays"] = err
 			errors.append(err)
