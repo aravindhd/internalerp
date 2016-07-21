@@ -42,17 +42,19 @@ def create_and_send_text_email(subject, mailBody, useDefaultFrom, toList, ccList
 		print("[%s] Mail capability DISABLED" % (funcName))
 
 def create_subject_for_leave_request(leaveObj):
+	print("%s" % leaveObj.startedDate.strftime("%B %d, %A %Y")) # Sample Format : April 15, Friday 2016
+	print("%s" % leaveObj.endDate.strftime("%B %d, %A %Y"))
 	if leaveObj.numberOfDays == 1:
-		subject = "Leave Request from %s for %s day between %s and %s" % (leaveObj.employee_id, leaveObj.numberOfDays, leaveObj.startedDate, leaveObj.endDate)
+		subject = "Leave Request from %s for %s day between [%s] and [%s]" % (leaveObj.employee_id, leaveObj.numberOfDays, leaveObj.startedDate.strftime("%B %d, %A %Y"), leaveObj.endDate.strftime("%B %d, %A %Y"))
 	else:
-		subject = "Leave Request from %s for %s days between %s and %s" % (leaveObj.employee_id, leaveObj.numberOfDays, leaveObj.startedDate, leaveObj.endDate)
+		subject = "Leave Request from %s for %s days between [%s] and [%s]" % (leaveObj.employee_id, leaveObj.numberOfDays, leaveObj.startedDate.strftime("%B %d, %A %Y"), leaveObj.endDate.strftime("%B %d, %A %Y"))
 	return subject
 
 def create_subject_for_leave_approved_rejected(leaveObj):
 	if leaveObj.status == "APPROVED":
-		subject = "Approved Leave for %s day between %s and %s" % (leaveObj.numberOfDays, leaveObj.startedDate, leaveObj.endDate)
+		subject = "Approved Leave for %s day between [%s] and [%s]" % (leaveObj.numberOfDays, leaveObj.startedDate.strftime("%B %d, %A %Y"), leaveObj.endDate.strftime("%B %d, %A %Y"))
 	elif leaveObj.status == "REJECTED":
-		subject = "Rejected Leave for %s day between %s and %s" % (leaveObj.numberOfDays, leaveObj.startedDate, leaveObj.endDate)
+		subject = "Rejected Leave for %s day between [%s] and [%s]" % (leaveObj.numberOfDays, leaveObj.startedDate.strftime("%B %d, %A %Y"), leaveObj.endDate.strftime("%B %d, %A %Y"))
 	return subject
 
 
@@ -74,8 +76,8 @@ def create_mailbody_for_leave_request(leaveObj):
 			</p>"  % (leaveObj.employee_id.manager,
 					  leaveObj.employee_id,
 					  leaveObj.leaveType,
-					  leaveObj.startedDate, 
-					  leaveObj.endDate, 
+					  leaveObj.startedDate.strftime("%B %d, %A %Y"), 
+					  leaveObj.endDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.numberOfDays,
 					  leaveObj.reason) 
 	return body
@@ -105,8 +107,8 @@ def create_mailbody_for_leave_approved_rejected(leaveObj):
 			</p>"  % (leaveObj.employee_id,
 					  status,
 					  leaveObj.leaveType,
-					  leaveObj.startedDate, 
-					  leaveObj.endDate, 
+					  leaveObj.startedDate.strftime("%B %d, %A %Y"), 
+					  leaveObj.endDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.numberOfDays,
 					  leaveObj.reason) 
 	return body
