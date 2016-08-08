@@ -621,7 +621,7 @@ def leave_create(request):
 	holidaysList = Holidays.objects.filter(country=emp.organization.country)
 
 	if request.method == "POST":
-		if emp.is_manager:	# TODO: Instaed of manager check user role in future
+		if emp.role == 'HR-MANAGER':	# TODO: Instaed of manager check user role in future
 			lForm = leaveRequestForm(False, request.POST, request.FILES or None, initial = {'employee_id': emp })	
 		else:
 			lForm = leaveRequestForm(True, request.POST, request.FILES or None, initial = {'employee_id': emp })
@@ -640,7 +640,7 @@ def leave_create(request):
 			return redirect('leave_details', id=instance.id)
 	else:
 		# TODO: Instaed of manager check user role in future
-		if emp.is_manager:
+		if emp.role == 'HR-MANAGER':
 			lForm = leaveRequestForm(False, initial = {'employee_id': emp })
 		else:
 			lForm = leaveRequestForm(True, initial = {'employee_id': emp })

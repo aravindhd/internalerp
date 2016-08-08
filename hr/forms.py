@@ -65,7 +65,8 @@ class leaveRequestForm(forms.ModelForm):
 	def __init__(self, isEmployeeReq,  *args, **kwargs):
 		super(leaveRequestForm, self).__init__(*args, **kwargs)
 		if isEmployeeReq:
-			self.fields['employee_id'].widget.attrs['class'] = 'readOnlySelect'
+			#self.fields['employee_id'].widget.attrs['class'] = 'readOnlySelect'
+                        self.fields['employee_id'].widget.attrs['style'] = 'pointer-events:none'
 
 	def clean(self):
 		emp = self.cleaned_data.get('employee_id')
