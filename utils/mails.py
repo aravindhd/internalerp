@@ -69,7 +69,7 @@ def create_mailbody_for_leave_request(leaveObj):
 			Date To 	: %s<br> \
 			Days 		: %s<br> \
 			Reason 		: %s<br> \
-			<br><br>Please Login to <a href='#'>Internal-Portal</a> to validate the request.\
+			<br><br>Please Login to <a href='settings.DEPLOYMENT_PORTAL_URL'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
 			HR Admin (Internal-Portal)\
@@ -100,7 +100,7 @@ def create_mailbody_for_leave_approved_rejected(leaveObj):
 			Date To 	: %s<br> \
 			Days 		: %s<br> \
 			Reason 		: %s<br> \
-			<br><br>Please Login to <a href='#'>Internal-Portal</a> to validate the request.\
+			<br><br>Please Login to <a href='settings.DEPLOYMENT_PORTAL_URL'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
 			HR Admin (Internal-Portal)\

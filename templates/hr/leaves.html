@@ -13,7 +13,17 @@
 <SECTION class="content">
 	
 <div class="table-responsive container"> 
-	<legend>Leaves</legend>
+	<legend>
+        {% if '/empleaves' in request.path %}
+            My Leaves
+        {% elif '/myempleavesToApprove' in request.path %}
+            Leaves To Approve
+        {% elif '/leavesToApprove' in request.path %}
+            Leaves To Approve
+        {% else %}
+            Leave Summary
+        {% endif %}
+        </legend>
     <form method="GET" action=''>
 	<div class="search-box">
 		<label for="name" class="control-label">Leave Info</label>

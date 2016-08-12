@@ -1,3 +1,4 @@
+import math
 from django import forms
 from .models import Country, Organization
 from .models import EmployeesDirectory, Department, EmploymentHistory
@@ -82,7 +83,12 @@ class leaveRequestForm(forms.ModelForm):
 		numberBusinessDays = networkdays(fromDate, endDate, empHolidays)
 		print("Working Days: [%s]" % (Decimal(numberBusinessDays)))
 		print("Num of Days : [%s]" % (Decimal(numDays)))
+		frac, whole = math.modf(Decimal(numDays))
 		errors = []
+		if (frac > 0.5) or (frac < 0.5):
+			err = "[ Number of days must be either whole number or multiples of 0.5 ]"
+			self._errors["invalid_numdays"] = err
+			errors.append(err)
 		if endDate < fromDate:
 			err = "[ End date cannot be earlier than start date ]"
 			self._errors["invalid_dates"] = err
@@ -295,21 +301,21 @@ class leaveEditForm(forms.ModelForm):
         }
 
 class leaveAccuralForm(forms.Form):
-	pl = forms.DecimalField(label='Privilege Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
 	cl = forms.DecimalField(label='Casual Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
+	pl = forms.DecimalField(label='Privilege Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
 	sl = forms.DecimalField(label='Sick Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,)
 	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,)
-	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,)
 	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,)
+	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,)
 
 class singleEmployeeLeaveAccuralForm(forms.Form):
 	employee = forms.ModelChoiceField(queryset=EmployeesDirectory.objects.all(),required=True,initial=0) 
-	pl = forms.DecimalField(label='Privilege Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
 	cl = forms.DecimalField(label='Casual Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
+	pl = forms.DecimalField(label='Privilege Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
 	sl = forms.DecimalField(label='Sick Leave', min_value=0,max_value=12,max_digits=4,decimal_places=2,initial=0)
 	compoff = forms.DecimalField(label='Compensation Leave', min_value=0,max_digits=4,decimal_places=2,initial=0)
-	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,initial=0)
 	lop = forms.DecimalField(label='Unpaid Leaves', min_value=0,max_digits=4,decimal_places=2,initial=0)
+	wfh = forms.DecimalField(label='Work From Home', min_value=0,max_value=6,max_digits=4,decimal_places=2,initial=0)
 
 class csvImportLeaveAccuralForm(forms.Form):
 	csvFile = forms.FileField(required=False, label='CSV File')

@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -422,7 +423,7 @@ def leaves_list(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
 
-	leavesList = Leaves.objects.all()
+	leavesList = Leaves.objects.all().order_by(F('id').desc())
 	#empList = EmployeesDirectory.objects.all()
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
@@ -470,7 +471,7 @@ def leaves_list_per_manager(request):
 		return redirect('auth_login')
 
 	mgr = EmployeesDirectory.objects.filter(user=request.user)
-	leavesList = Leaves.objects.filter(employee_id__manager=mgr)
+	leavesList = Leaves.objects.filter(employee_id__manager=mgr).order_by(F('id').desc())
 	#empList = EmployeesDirectory.objects.all()
         searchQuery = request.GET.get("searchQueryStr")
         if searchQuery:
@@ -518,7 +519,7 @@ def leaves_to_approve(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
 
-	leavesList = Leaves.objects.filter(status='SUBMITTED')
+	leavesList = Leaves.objects.filter(status='SUBMITTED').order_by(F('id').desc())
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
@@ -558,7 +559,7 @@ def leaves_to_approve_per_manager(request):
 		return redirect('auth_login')
 
 	mgr = EmployeesDirectory.objects.filter(user=request.user)
-	leavesList = Leaves.objects.filter(employee_id__manager=mgr).filter(status='SUBMITTED')
+	leavesList = Leaves.objects.filter(employee_id__manager=mgr).filter(status='SUBMITTED').order_by(F('id').desc())
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
@@ -607,7 +608,7 @@ def employee_leaves(request):
 		return redirect('auth_login')
 	empInfo = EmployeesDirectory.objects.filter(user=request.user)
 	if empInfo.count() > 0 :
-		leavesList = Leaves.objects.filter(employee_id=empInfo)
+		leavesList = Leaves.objects.filter(employee_id=empInfo).order_by(F('id').desc())
 	context = { 'leavesList' : leavesList }
 	return render(request, 'hr/leaves.html', context)		
 
@@ -696,7 +697,12 @@ def leave_update(request, id):
 			if instance.status == 'APPROVED' or instance.status == 'REJECTED':
 				_process_mail_for_leave_approved_rejected(instance, 'html')
 
-			return redirect('leaves_list')
+			if userRole == 'manager':
+				return redirect('leaves_to_approve_per_manager')
+			elif userRole == 'admin':
+				return redirect('leaves_list')
+			else:
+				return redirect('employee_leaves')
 	else:
 		print(">>>>> GET Leave Update:....")
 		lForm = leaveEditForm(contextLeaveStatusChoices, userRole, instance=instance)
