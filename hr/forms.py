@@ -85,7 +85,7 @@ class leaveRequestForm(forms.ModelForm):
 		print("Num of Days : [%s]" % (Decimal(numDays)))
 		frac, whole = math.modf(Decimal(numDays))
 		errors = []
-		if (frac > 0.5) or (frac < 0.5):
+		if ( (frac != 0.0 ) and  ((frac > 0.5) or (frac < 0.5))):
 			err = "[ Number of days must be either whole number or multiples of 0.5 ]"
 			self._errors["invalid_numdays"] = err
 			errors.append(err)
@@ -186,8 +186,13 @@ class leaveEditForm(forms.ModelForm):
 		prevNumDays = Leaves.objects.get(id=self.instance.id).numberOfDays
 
 		empAccuredLeaves = (empAccuredLeaves + prevNumDays)
+		frac, whole = math.modf(Decimal(numDays))
 
 		errors = []
+		if ( (frac != 0.0 ) and  ((frac > 0.5) or (frac < 0.5))):
+			err = "[ Number of days must be either whole number or multiples of 0.5 ]"
+			self._errors["invalid_numdays"] = err
+			errors.append(err)
 		if endDate < fromDate:
 			err = "[ End date cannot be earlier than start date ]"
 			self._errors["invalid_dates"] = err
