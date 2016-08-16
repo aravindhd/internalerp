@@ -63,13 +63,13 @@ def create_mailbody_for_leave_request(leaveObj):
 			<br><br>\
 			<b><u>Leave Details</u></b>\
 			<br><br>\
-			Employee 	: %s<br> \
-			Leave Type 	: %s<br> \
-			Date From 	: %s<br> \
-			Date To 	: %s<br> \
-			Days 		: %s<br> \
-			Reason 		: %s<br> \
-			<br><br>Please Login to <a href='settings.DEPLOYMENT_PORTAL_URL'>Internal-Portal</a> to validate the request.\
+			Employee<span style='display:inline-block; width: 35px;'></span>: %s<br> \
+			Leave Type<span style='display:inline-block; width: 25px;'></span>: %s<br> \
+			Date From<span style='display:inline-block; width: 32px;'></span>: %s<br> \
+			Date To<span style='display:inline-block; width: 50px;'></span>: %s<br> \
+			Days<span style='display:inline-block; width: 68px;'></span>: %s<br> \
+			Reason<span style='display:inline-block; width: 55px;'></span>: %s<br> \
+			<br><br>Please Login to <a href='%s'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
 			HR Admin (Internal-Portal)\
@@ -79,7 +79,8 @@ def create_mailbody_for_leave_request(leaveObj):
 					  leaveObj.startedDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.endDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.numberOfDays,
-					  leaveObj.reason) 
+					  leaveObj.reason,
+					  settings.DEPLOYMENT_PORTAL_URL) 
 	return body
 
 def create_mailbody_for_leave_approved_rejected(leaveObj):
@@ -95,12 +96,12 @@ def create_mailbody_for_leave_approved_rejected(leaveObj):
 			<br><br>\
 			<b><u>Leave Details</u></b> \
 			<br><br>\
-			Leave Type 	: %s<br> \
-			Date From 	: %s<br> \
-			Date To 	: %s<br> \
-			Days 		: %s<br> \
-			Reason 		: %s<br> \
-			<br><br>Please Login to <a href='settings.DEPLOYMENT_PORTAL_URL'>Internal-Portal</a> to validate the request.\
+			Leave Type<span style='display:inline-block; width: 25px;'></span>: %s<br> \
+			Date From<span style='display:inline-block; width: 32px;'></span>: %s<br> \
+			Date To<span style='display:inline-block; width: 50px;'></span>: %s<br> \
+			Days<span style='display:inline-block; width: 68px;'></span>: %s<br> \
+			Reason<span style='display:inline-block; width: 55px;'></span>: %s<br> \
+			<br><br>Please Login to <a href='%s'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
 			HR Admin (Internal-Portal)\
@@ -110,7 +111,7 @@ def create_mailbody_for_leave_approved_rejected(leaveObj):
 					  leaveObj.startedDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.endDate.strftime("%B %d, %A %Y"), 
 					  leaveObj.numberOfDays,
-					  leaveObj.reason) 
+					  leaveObj.reason,settings.DEPLOYMENT_PORTAL_URL) 
 	return body
 
 def create_toList_for_leave_request(leaveObj):
