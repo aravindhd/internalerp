@@ -63,12 +63,12 @@ def create_mailbody_for_leave_request(leaveObj):
 			<br><br>\
 			<b><u>Leave Details</u></b>\
 			<br><br>\
-			Employee<span style='display:inline-block; width: 35px;'></span>: %s<br> \
-			Leave Type<span style='display:inline-block; width: 25px;'></span>: %s<br> \
-			Date From<span style='display:inline-block; width: 32px;'></span>: %s<br> \
-			Date To<span style='display:inline-block; width: 50px;'></span>: %s<br> \
-			Days<span style='display:inline-block; width: 68px;'></span>: %s<br> \
-			Reason<span style='display:inline-block; width: 55px;'></span>: %s<br> \
+			Employee &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Leave Type &nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Date From &nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Date To &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Days &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Reason &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
 			<br><br>Please Login to <a href='%s'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
@@ -96,11 +96,11 @@ def create_mailbody_for_leave_approved_rejected(leaveObj):
 			<br><br>\
 			<b><u>Leave Details</u></b> \
 			<br><br>\
-			Leave Type<span style='display:inline-block; width: 25px;'></span>: %s<br> \
-			Date From<span style='display:inline-block; width: 32px;'></span>: %s<br> \
-			Date To<span style='display:inline-block; width: 50px;'></span>: %s<br> \
-			Days<span style='display:inline-block; width: 68px;'></span>: %s<br> \
-			Reason<span style='display:inline-block; width: 55px;'></span>: %s<br> \
+			Leave Type &nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Date From &nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Date To &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Days &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
+			Reason &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp;&nbsp; %s<br> \
 			<br><br>Please Login to <a href='%s'>Internal-Portal</a> to validate the request.\
 			<br><br> \
 			Thanks,<br> \
