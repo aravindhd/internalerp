@@ -2,7 +2,7 @@ from django.db.models import F
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, permission_required
@@ -417,6 +417,55 @@ def leaves_allocate(request):
 		
 	context = { 'lAccForm' : lAccForm, 'csvForm':csvForm }
 	return render(request, 'hr/leaves_allocate.html', context)
+
+@permission_required('hr.view_leaveaccurals', raise_exception=True)
+def export_leave_accruals(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	# Create the HttpResponse object with the appropriate CSV header.
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename="employeeLeaveAccruals.csv"'
+
+	empList = EmployeesDirectory.objects.all()
+	writer = csv.writer(response)
+	writer.writerow(['Employee', 'CL', 'PL', 'SL', 'COMP', 'LOP', 'WFH'])
+	for emp in empList:
+		LeaveAccurals.objects.get(employee=emp, leaveType='CL')
+		lAccList = LeaveAccurals.objects.filter(employee=emp)
+		lAccrual = {}
+		for lAcc in lAccList:
+			lAccrual['%s'%(lAcc.leaveType)] = lAcc.accuredLeaves
+
+		print("*******************************************")
+		if lAccrual.has_key('CL'):
+			cl = lAccrual['CL']
+		else:
+			cl = 0.0
+		if lAccrual.has_key('PL'):
+			pl = lAccrual['PL']
+		else:
+			pl = 0.0
+		if lAccrual.has_key('SL'):
+			sl = lAccrual['SL']
+		else:
+			sl = 0.0
+		if lAccrual.has_key('COMP'):
+			comp = lAccrual['COMP']
+		else:
+			comp = 0.0
+		if lAccrual.has_key('LOP'):
+			lop = lAccrual['LOP']
+		else:
+			lop = 0.0
+		if lAccrual.has_key('WFH'):
+			wfh = lAccrual['WFH']
+		else:
+			wfh = 0.0
+
+		print("%s : CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." % (emp, cl, pl, sl, comp, lop, wfh))
+		writer.writerow(['%s'% (emp), '%s' %(cl), '%s'%(pl), '%s'%(sl), '%s'%(comp), '%s'%(lop), '%s'%(wfh)])
+	return response	
 
 @permission_required('hr.view_leaves', raise_exception=True)
 def leaves_list(request):
