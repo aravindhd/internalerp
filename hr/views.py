@@ -431,7 +431,6 @@ def export_leave_accruals(request):
 	writer = csv.writer(response)
 	writer.writerow(['Employee', 'CL', 'PL', 'SL', 'COMP', 'LOP', 'WFH'])
 	for emp in empList:
-		LeaveAccurals.objects.get(employee=emp, leaveType='CL')
 		lAccList = LeaveAccurals.objects.filter(employee=emp)
 		lAccrual = {}
 		for lAcc in lAccList:
