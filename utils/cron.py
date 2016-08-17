@@ -25,11 +25,11 @@ def SendLeavesToApproveEmail():
                     </thead>\
                     <tbody>"  % (mgr)
         bottom = "</tbody></table> \
-            Please Login to <a href='#'>Internal-Portal</a> to validate the request.\
+            Please Login to <a href='%s'>Internal-Portal</a> to validate the request.\
             <br><br> \
             Thanks,<br> \
             HR Admin (Internal-Portal)\
-            </p>"
+            </p>" % (settings.DEPLOYMENT_PORTAL_URL)
         toList.append(mgr.email)
         rows = []
         leavesList = Leaves.objects.filter(employee_id__manager=mgr)
