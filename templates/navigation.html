@@ -103,11 +103,12 @@
 		                    {% endif %}
 							{{ user.employeesdirectory }}
 						</div>
-						<div class="welcome_text"><img alt="ProcessMaker" src="{% static 'images/logout.png' %}" class="logout"><a href="{% url 'auth_logout' %}?next=/hr/empInfo" style="color:#FFF;">Log out</a></div> 
-        				<div class="welcome_text"><a href="{% url 'auth_password_change' %}" style="color:#FFF;">Change password</a></div>    				
+						<div class="welcome_text"><a href="{% url 'auth_password_change' %}" style="color:#FFF;">Change password</a></div>
+						<div class="welcome_text"><img alt="ProcessMaker" src="{% static 'images/logout.png' %}" class="logout"><a href="{% url 'auth_logout' %}?next=/hr/empInfo" style="color:#FFF;">Log out</a></div>    				
 				</div>
 				{% else %}
-					<div class="header-icons">	
+					<div class="header-icons">
+						<div class="welcome_text"><a href="{% url 'auth_password_reset' %}" style="color:#FFF;">Forgot Password</a></div>
 						<div class="welcome_text"><a href="{% url 'auth_login' %}" style="color:#FFF;">Log in</a></div>
 					</div>
 				{% endif %}					
