@@ -567,7 +567,7 @@ def leaves_to_approve(request):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')
 
-	leavesList = Leaves.objects.filter(status='SUBMITTED').order_by(F('id').desc())
+	leavesList = Leaves.objects.filter(Q(status='SUBMITTED') | Q(status='REOPENED')).order_by(F('id').desc())
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
@@ -607,7 +607,7 @@ def leaves_to_approve_per_manager(request):
 		return redirect('auth_login')
 
 	mgr = EmployeesDirectory.objects.filter(user=request.user)
-	leavesList = Leaves.objects.filter(employee_id__manager=mgr).filter(status='SUBMITTED').order_by(F('id').desc())
+	leavesList = Leaves.objects.filter(employee_id__manager=mgr).filter(Q(status='SUBMITTED') | Q(status='REOPENED')).order_by(F('id').desc())
 	searchQuery = request.GET.get("searchQueryStr")
 	if searchQuery:
 		leavesList = leavesList.filter(
