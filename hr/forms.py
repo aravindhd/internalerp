@@ -226,53 +226,74 @@ class leaveEditForm(forms.ModelForm):
 		prevNumDays = Leaves.objects.get(id=self.instance.id).numberOfDays
 		prevStatus = Leaves.objects.get(id=self.instance.id).status
 		prevLType = Leaves.objects.get(id=self.instance.id).leaveType
+		prevEmpAccBalance = LeaveAccurals.objects.get(employee=emp, leaveType=prevLType).accuredLeaves
 
+		revertAccuralUpdate = False
 		doAccuralUpdate = False
+		isFormDetailsChanged = False
+		updatePrevLTypeAcc = False
 
-		# Manager approves/rejects a leave
-		# Employee Discards/cancels the submitted non-updated leave 
-		if ( (prevStatus == 'SUBMITTED') or (prevStatus == 'CREATED') or (prevStatus == 'REOPENED') ) and \
-		   ((status == 'REJECTED') or (status == 'DISCARD') ):
-			if prevLType == 'LOP':
-				newAccuralBalance = (Decimal(empAccBalance) - Decimal(prevNumDays))
-			else:
-				newAccuralBalance = (Decimal(empAccBalance) + Decimal(prevNumDays))
-			doAccuralUpdate = True
-		elif ( (prevStatus == 'REJECTED') or (prevStatus == 'DISCARD') ) and (status == 'REOPENED'):# Employee re-opens rejected/discarded leave
-			if prevLType == 'LOP':
-				newAccuralBalance = Decimal(empAccBalance) + Decimal(numDays)
-			else:
-				newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
-			doAccuralUpdate = True
-		elif (prevStatus == 'APPROVED') and (status == 'DISCARD'):# Employee cancels approved leave
-			if prevLType == 'LOP':
-				newAccuralBalance = Decimal(empAccBalance) - Decimal(prevNumDays)
-			else:
-				newAccuralBalance = Decimal(empAccBalance) + Decimal(prevNumDays)
-			doAccuralUpdate = True
-		elif (prevStatus == 'APPROVED') and (status == 'REJECTED'):# Manager re-edits and rejects an approved leave
-			if prevLType == 'LOP':
-				newAccuralBalance = Decimal(empAccBalance) - Decimal(prevNumDays)
-			else:
-				newAccuralBalance = Decimal(empAccBalance) + Decimal(prevNumDays)
-			doAccuralUpdate = True
+		if( prevLType != lType):
+			isFormDetailsChanged = True
+			updatePrevLTypeAcc = True
+			pass
+		if(prevNumDays != numDays):
+			isFormDetailsChanged = True
+			pass
+
+		if(prevStatus == status):
+			revertAccuralUpdate = False
 		else:
-			#print("......Leave Edit Form......")
-			if (prevLType == 'SL') and (lType != 'SL'):
-				#print("Converting the APPROVED SL leave to Others due to missing Medical Certificate..")
-				empAccBalance_SL = LeaveAccurals.objects.get(employee=emp, leaveType=prevLType).accuredLeaves
-				newAccuralBalance_SL = Decimal(empAccBalance_SL) + Decimal(prevNumDays)
-				newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
-				#print("Updating leave Accural for leave Type : %s with balance %s." % (lType, newAccuralBalance))
-				#print("Updating leave Accural for leave Type : %s with balance %s." % (prevLType, newAccuralBalance_SL))
-				LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
-				LeaveAccurals.objects.filter(employee=emp, leaveType=prevLType).update(accuredLeaves=newAccuralBalance_SL)
+			if ((status == 'REJECTED') or (status == 'DISCARD')): # Rejected or Discard
+				revertAccuralUpdate = True
+				pass
+			elif ( ((prevStatus == 'REJECTED') or (prevStatus == 'DISCARD')) and \
+					((status == 'REOPENED') or (status == 'SUBMITTED'))
+				): # Submitted or ReOpened
+				doAccuralUpdate = True
+				pass
+			else : # Approved or Closed
+				if((isFormDetailsChanged == True) or (updatePrevLTypeAcc == True)):
+					print("CASE : isFormDetailsChanged == True or updatePrevLTypeAcc == True...")
+					pass
+				pass
+
+		if(revertAccuralUpdate == True): # Status got changed as Rejected/Discard so accrual need to revert
+			# Ignore the form changes if any 
+			# Revert the accrual update made for older form values only
+			print("Status got changed as Rejected/Discard so accrual need to revert")
+			if prevLType == 'LOP':
+				newAccuralBalance = (Decimal(prevEmpAccBalance) - Decimal(prevNumDays))
 			else:
-				pass # Throw error if any states mismatches TODO:
-
-		if doAccuralUpdate:
-			LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
-
+				newAccuralBalance = (Decimal(prevEmpAccBalance) + Decimal(prevNumDays))
+			LeaveAccurals.objects.filter(employee=emp, leaveType=prevLType).update(accuredLeaves=newAccuralBalance)
+			pass
+		else: 
+			# Re-submission of rejected/discarded/submitted/reopened leaves, 
+			# accrual need to reduced
+			print(">>>>> doAccuralUpdate : %s..." % (doAccuralUpdate))
+			if((isFormDetailsChanged == True) or (doAccuralUpdate==True)): # Form details changed
+				print("Re-submission of rejected/discarded/submitted/reopened leaves : updatePrevLTypeAcc- %s" %(updatePrevLTypeAcc))
+				newAccuralBalance = 0
+				if(updatePrevLTypeAcc == True): # Revert the accrual update made for older form values only
+					if prevLType == 'LOP':
+						newAccuralBalance = (Decimal(prevEmpAccBalance) - Decimal(prevNumDays))
+					else:
+						newAccuralBalance = (Decimal(prevEmpAccBalance) + Decimal(prevNumDays))
+					print("Updating the Old Leave Type : %s with Accrual Balance %s..." %(prevLType, newAccuralBalance))
+					LeaveAccurals.objects.filter(employee=emp, leaveType=prevLType).update(accuredLeaves=newAccuralBalance)
+					pass
+				newAccuralBalance = 0
+				# Updating the accrual for current form values
+				if(lType == 'LOP'):
+					newAccuralBalance = Decimal(empAccBalance) + Decimal(numDays)
+				else:
+					newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
+				print("Updating the CURRENT Leave Type : %s with Accrual Balance : %s..." % (lType, newAccuralBalance))
+				LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
+				# Revert the accrual update made for current form values only
+				pass
+			pass
 		# Saving the leave request info
 		leaveUpdForm.save()
 		return leaveUpdForm
