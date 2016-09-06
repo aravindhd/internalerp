@@ -244,10 +244,14 @@ class leaveEditForm(forms.ModelForm):
 		if(prevStatus == status):
 			revertAccuralUpdate = False
 		else:
-			if ((status == 'REJECTED') or (status == 'DISCARD')): # Rejected or Discard
+			if (status == 'REJECTED'): # Rejected
 				revertAccuralUpdate = True
 				pass
-			elif ( ((prevStatus == 'REJECTED') or (prevStatus == 'DISCARD')) and \
+			elif ( ( (prevStatus == 'SUBMITTED')  or (prevStatus == 'REOPENED') or (prevStatus == 'APPROVED')) and \
+					(status == 'DISCARD') ):
+				revertAccuralUpdate = True
+				pass
+			elif ( (prevStatus == 'REJECTED') and \
 					((status == 'REOPENED') or (status == 'SUBMITTED'))
 				): # Submitted or ReOpened
 				doAccuralUpdate = True
@@ -275,6 +279,7 @@ class leaveEditForm(forms.ModelForm):
 			if((isFormDetailsChanged == True) or (doAccuralUpdate==True)): # Form details changed
 				print("Re-submission of rejected/discarded/submitted/reopened leaves : updatePrevLTypeAcc- %s" %(updatePrevLTypeAcc))
 				newAccuralBalance = 0
+				newCurrLTypeAccrual = Decimal(empAccBalance)
 				if(updatePrevLTypeAcc == True): # Revert the accrual update made for older form values only
 					if prevLType == 'LOP':
 						newAccuralBalance = (Decimal(prevEmpAccBalance) - Decimal(prevNumDays))
@@ -283,12 +288,18 @@ class leaveEditForm(forms.ModelForm):
 					print("Updating the Old Leave Type : %s with Accrual Balance %s..." %(prevLType, newAccuralBalance))
 					LeaveAccurals.objects.filter(employee=emp, leaveType=prevLType).update(accuredLeaves=newAccuralBalance)
 					pass
+				elif((prevNumDays != numDays) and (doAccuralUpdate != True) ):
+					if(lType == 'LOP'):
+						newCurrLTypeAccrual = Decimal(empAccBalance) - Decimal(prevNumDays)
+					else:
+						newCurrLTypeAccrual = Decimal(empAccBalance) + Decimal(prevNumDays)
+
 				newAccuralBalance = 0
 				# Updating the accrual for current form values
 				if(lType == 'LOP'):
-					newAccuralBalance = Decimal(empAccBalance) + Decimal(numDays)
+					newAccuralBalance = Decimal(newCurrLTypeAccrual) + Decimal(numDays)
 				else:
-					newAccuralBalance = Decimal(empAccBalance) - Decimal(numDays)
+					newAccuralBalance = Decimal(newCurrLTypeAccrual) - Decimal(numDays)
 				print("Updating the CURRENT Leave Type : %s with Accrual Balance : %s..." % (lType, newAccuralBalance))
 				LeaveAccurals.objects.filter(employee=emp, leaveType=lType).update(accuredLeaves=newAccuralBalance)
 				# Revert the accrual update made for current form values only

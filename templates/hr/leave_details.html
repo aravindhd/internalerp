@@ -67,7 +67,7 @@
               {% endif %}
               {% url 'leave_update' id=leaveInfo.id as editUrl %}
               <span class="pull-right">
-                {% if leaveInfo.status != 'CLOSED' %}
+                {% if leaveInfo.status != 'CLOSED' and leaveInfo.status != 'DISCARD' %}
                 <a href="{{ editUrl }}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
                 {% endif %}
                 <a href="{{ backUrl }}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
