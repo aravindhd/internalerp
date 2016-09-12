@@ -1,4 +1,54 @@
 {% load staticfiles %}
+<style>
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+</style>
 <div class="Header">
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
@@ -35,31 +85,55 @@
 						{% url 'leaves_allocate' as leavesAllocateUrl %}
 						{% url 'employee_info' as empInfoUrl %}
 						{% url 'hr_data_export' as hrDataExport %}
-						<ul class="dropdown-menu">
-							{% if perms.hr.add_employeesdirectory %}
-							<li><a href="#" onclick="document.location='{{ newEmpUrl }}'">Add New Employee</a></li>
-							{% endif %}
+						<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
 							{% if perms.hr.view_employeesdirectory %}
-							  {% if user.employeesdirectory.is_manager %}
-									<li><a href="#" onclick="document.location='{{ empListPerMgr }}'">Employees</a></li>
-							  {% else %}
-									<li><a href="#" onclick="document.location='{{ employeesUrl }}'">Employees</a></li>
-								{% endif %}
+								<li class="dropdown-submenu">
+									<a href="#">Employees</a>
+									<ul class="dropdown-menu">
+									  	{% if perms.hr.add_employeesdirectory %}
+										<li><a tabindex="-1" href="#" onclick="document.location='{{ newEmpUrl }}'">Add Employee</a></li>
+										{% endif %}
+										{% if user.employeesdirectory.is_manager %}
+											<li><a href="#" onclick="document.location='{{ empListPerMgr }}'">My Employees</a></li>
+										{% else %}
+											<li><a href="#" onclick="document.location='{{ employeesUrl }}'">View Employees</a></li>
+										{% endif %}
+									</ul>
+								</li>
 							{% endif %}
 							{% if perms.hr.view_leaves %}
-								{% if user.employeesdirectory.is_manager %}
-									<li><a href="#" onclick="document.location='{{ leavesPerMgrUrl }}'">Leave Summary</a></li>
-									<li><a href="#" onclick="document.location='{{ leavesToApprovePerMgrUrl }}'">Leaves To Approve</a></li>
-								{% elif user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
-									<li><a href="#" onclick="document.location='{{ leavesUrl }}'">Leave Summary</a></li>
-									<li><a href="#" onclick="document.location='{{ leavesToApproveUrl }}'">Leaves To Approve</a></li>
-								{% endif %}
+							<li class="dropdown-submenu">
+								<a href="#">Leaves</a>
+								<ul class="dropdown-menu">
+									<li><a tabindex="-1" href="#" onclick="document.location='{{ leaveCreateUrl }}'">Leave Request</a></li>
+									{% if user.employeesdirectory.is_manager %}
+										<li><a href="#" onclick="document.location='{{ leavesToApprovePerMgrUrl }}'">Leaves To Approve</a></li>
+										<li><a href="#" onclick="document.location='{{ leavesPerMgrUrl }}'">Leave Summary</a></li>
+									{% elif user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
+										<li><a href="#" onclick="document.location='{{ leavesToApproveUrl }}'">Leaves To Approve</a></li>
+										<li><a href="#" onclick="document.location='{{ leavesUrl }}'">Leave Summary</a></li>										
+									{% endif %}
+									{% if perms.hr.add_leaveaccurals %}
+										<li><a href="#" onclick="document.location='{{ leavesAllocateUrl }}'">Allocate Leaves</a></li>
+									{% endif %}
+								</ul>
+							</li>
 							{% endif %}
-							{% if perms.hr.add_leaveaccurals %}
-							<li><a href="#" onclick="document.location='{{ leavesAllocateUrl }}'">Allocate Leaves</a></li>
-							<li><a href="#" onclick="document.location='{{ hrDataExport }}'">HR Data Export</a></li>
+							{% if user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
+								<!--li class="dropdown-submenu">
+									<a href="#" onclick="document.location='{{ hrDataExport }}'">HR Data Export</a>
+									<ul class="dropdown-menu">
+										<li><a tabindex="-1" href="#">Export</a></li>
+											<ul class="dropdown-menu">
+												<li><a href="#">3rd level</a></li>
+												<li><a href="#">3rd level</a></li>
+											</ul>
+										<li><a href="#">Second level</a></li>
+										<li><a href="#">Second level</a></li>
+									</ul>
+								</li-->
+							<li><a href="#" onclick="document.location='{{ hrDataExport }}'">Data Export</a></li>	
 							{% endif %}
-							<li><a href="#" onclick="document.location='{{ leaveCreateUrl }}'">Leave Request</a></li>
 							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>	
 							<li><a href="#" onclick="document.location='{{ empLeavesUrl }}'">My Leaves</a></li>
 						</ul>
