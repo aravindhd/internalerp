@@ -34,7 +34,7 @@
 						{% url 'employee_leaves' as empLeavesUrl %}
 						{% url 'leaves_allocate' as leavesAllocateUrl %}
 						{% url 'employee_info' as empInfoUrl %}
-						{% url 'export_leave_accruals' as exportLeaveAccruals %}
+						{% url 'hr_data_export' as hrDataExport %}
 						<ul class="dropdown-menu">
 							{% if perms.hr.add_employeesdirectory %}
 							<li><a href="#" onclick="document.location='{{ newEmpUrl }}'">Add New Employee</a></li>
@@ -57,7 +57,7 @@
 							{% endif %}
 							{% if perms.hr.add_leaveaccurals %}
 							<li><a href="#" onclick="document.location='{{ leavesAllocateUrl }}'">Allocate Leaves</a></li>
-							<li><a href="#" onclick="document.location='{{ exportLeaveAccruals }}'">Export Accruals</a></li>
+							<li><a href="#" onclick="document.location='{{ hrDataExport }}'">HR Data Export</a></li>
 							{% endif %}
 							<li><a href="#" onclick="document.location='{{ leaveCreateUrl }}'">Leave Request</a></li>
 							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>	

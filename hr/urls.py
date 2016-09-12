@@ -27,5 +27,6 @@ urlpatterns = [
     url(r'^leavesAllocate/$', views.leaves_allocate, name='leaves_allocate'),
     url(r'^empInfo/$', views.employee_info, name='employee_info'),
     url(r'^$', views.employee_info, name='employee_info'),
-    url(r'^exportLeaveAccruals$', views.export_leave_accruals, name='export_leave_accruals'),
+    url(r'^hrDataExport$', views.hr_data_export, name='hr_data_export'),
+    
 ]

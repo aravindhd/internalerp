@@ -85,6 +85,8 @@ class LeaveAccurals(models.Model):
             ('view_leaveaccurals', 'View Leave Accural Info'),
             ('edit_leaveaccurals', 'Edit Leave Accural Details'),
         )
+	def __str__(self):
+		return "%s - %s" %(self.leaveType, self.accuredLeaves)
 
 class Holidays(models.Model):
 	description = models.CharField(max_length=254, blank=False)

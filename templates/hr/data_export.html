@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+<script src="{% static 'js/date-picker.js' %}"></script>
+<link href="{% static 'css/date-picker.css' %}" rel="stylesheet">
+<script type="text/javascript">
+  $(function() {
+    //alert("Trying the Date Widget...");
+    $( ".date_picker" ).datepicker({ format: "yyyy-mm-dd" });
+  });
+
+function toggleProfile(value){
+	if(value == "0"){
+		document.getElementById('employees_section').style.display = "block";
+		document.getElementById('leave_balances_section').style.display = "none";
+		document.getElementById('leaves_section').style.display = "none";
+		document.getElementById('leave_balances_link').classList.remove("link-active");
+		document.getElementById('leaves_link').classList.remove("link-active");
+		document.getElementById('employees_link').classList.add("link-active");
+		/* Leave Filters */
+		document.getElementById('leaveFilterSection').style.display = "none";
+		document.getElementById('leaveBalancePayroll').style.display = "none";
+
+		document.getElementById('exportCategory').value = "employees";
+		document.getElementById("startDate").disabled = true;
+		document.getElementById("endDate").disabled = true;
+		document.getElementById("payrollDate").disabled = true;
+		document.getElementById("isPayroll").disabled = true;
+	}
+	else if(value == "1"){
+		document.getElementById('leave_balances_section').style.display = "block";
+		document.getElementById('employees_section').style.display = "none";
+		document.getElementById('leaves_section').style.display = "none";
+		document.getElementById('employees_link').classList.remove("link-active");
+		document.getElementById('leaves_link').classList.remove("link-active");
+		document.getElementById('leave_balances_link').classList.add("link-active");
+		/* Leave Filters */
+		document.getElementById('leaveFilterSection').style.display = "none";
+		document.getElementById('leaveBalancePayroll').style.display = "block";
+
+		document.getElementById('exportCategory').value = "leavebalances";
+		document.getElementById("startDate").disabled = true;
+		document.getElementById("endDate").disabled = true;
+		document.getElementById("isPayroll").disabled = false;
+		document.getElementById("isPayroll").checked = false;
+		document.getElementById("payrollDate").disabled = true;
+	}
+	else if(value == "2"){
+		document.getElementById('leaves_section').style.display = "block";
+		document.getElementById('leave_balances_section').style.display = "none";
+		document.getElementById('employees_section').style.display = "none";
+		document.getElementById('leave_balances_link').classList.remove("link-active");
+		document.getElementById('employees_link').classList.remove("link-active");
+		document.getElementById('leaves_link').classList.add("link-active");
+
+		/* Leave Filters */
+		document.getElementById('leaveFilterSection').style.display = "block";
+		document.getElementById('leaveBalancePayroll').style.display = "none";
+
+		document.getElementById('exportCategory').value = "leaves";
+		document.getElementById("startDate").disabled = false;
+		document.getElementById("endDate").disabled = false;
+		document.getElementById("payrollDate").disabled = true;
+		document.getElementById("isPayroll").disabled = true;
+	}
+
+}
+function handlePayrollInputs(cbElement) {
+	if(cbElement.checked) {
+		document.getElementById("payrollDate").disabled = false;
+	}
+	else
+		document.getElementById("payrollDate").disabled = true;
+
+}
+</script>
+<SECTION class="content">
+	<div class="table-responsive container">
+		<div class="row">
+      		<div class="col-md-3 col-lg-3 " >
+      			<div class="links">
+					<div id="employees_link" class="link-active"><a onclick="toggleProfile(0);">Employees Directory</a></div>
+					<div id="leave_balances_link"><a onclick="toggleProfile(1);">Leave Balances</a></div>
+					<div id="leaves_link"><a onclick="toggleProfile(2);">Leaves</a></div>
+				</div>
+      		</div>
+      		<div class="col-md-9 col-lg-9 " >
+      			<div id="employees_section">
+                  <h3 class="info-title">Export > Employees Directory</h3>
+                </div>
+                <div id="leave_balances_section" style="display:none;">
+                  <h3 class="info-title">Export > Leave Balances</h3>
+                </div>
+                <div id="leaves_section" style="display:none;">
+                  <h3 class="info-title">Export > Leaves</h3>
+                </div>
+                <br>
+                <div class='row'></div>
+                <div>
+                <form method="GET" action=''>
+                	<input type="hidden" id="exportCategory"  name="exportCategory" value="employees" ></input>
+                	<!-- EMPLOYEES SELECTION -->
+                  	<div class="form-group row">
+					  <label for="employeeSelect" class="col-xs-2 col-form-label">Employee(s)</label>
+					  <div class="col-xs-10">
+					     <select class="form-control" id="employeeSelect" name="employeeSelect">
+								<option value="--" selected>-- All Employees --</option>
+								{% for employee in employeesList %}
+								<option value="{{ employee.id }}">{{ employee.firstname }} {{ employee.lastname }}</option>
+								{% endfor %}
+							</select>
+					  </div>
+					</div>
+					<!-- search Str -->
+					<div class="form-group row">
+				      <label for="searchStr" class="col-sm-2 col-form-label">Search Filter</label>
+				      <div class="col-sm-10">
+				      	<input type="text" id="searchStr"  name="searchStr" class="form-control" placeholder="Search by Manager, Designation" />
+				      </div>
+				    </div>
+				    <!-- SORT BY -->
+				    <div class="form-group row">
+				       <label for="sortbySelect" class="col-sm-2 col-form-label">Sort</label>
+				      <div class="col-sm-10">
+				        <select class="form-control" id="sortbySelect" name="sortby">
+				        	<option value="--" selected>-- Select any Value ---</option>
+							<option value="firstname">Firstname</option>
+							<option value="lastname">Lastname</option>
+							<option value="employee_id">ID</option>
+							<option value="email">Email</option>
+							<option value="manager">Manager</option>
+							<option value="designation">Designation</option>
+				        </select>
+				      </div>
+				    </div>
+				    <!-- LEAVES FILTER SECTION -->
+                  	<div class="form-group row" id="leaveFilterSection" style="display:none;">
+						  <label for="lType-select-input" class="col-xs-2 col-form-label">Leave Filters</label>
+						  <div class="col-xs-4">
+						    <select class="form-control" id="lType-select-input" name="leaveType">
+						    	<option value="--" selected>-- Select a Leave Type --</option>
+								<option value="CL">Casual</option>
+								<option value="PL" >Privilege</option>
+								<option value="SL">Sick</option>
+								<option value="WFH">Work From Home</option>
+								<option value="COMP">Compensation</option>
+								<option value="LOP">Loss Of Pay</option>
+							</select>
+						  </div>
+						  <div class="col-xs-3">
+						  	<input type="text" id="startDate"  name="startDate" class="form-control date_picker" placeholder="Start date" value="" />
+						  </div>
+						  <div class="col-xs-3">
+						  	<input type="text" id="endDate"  name="endDate" class="form-control date_picker" placeholder="End date" value="" />
+						  </div>
+                  	</div>
+                  	<!-- Is Payroll ? -->
+					<div class="form-group row" id="leaveBalancePayroll" style="display:none;">
+				      <label for="form-check-input" class="col-sm-2 col-form-label"></label>
+				      <div class="col-xs-2">
+				        <input class="form-check-input" type="checkbox" id="isPayroll" name="isPayroll" onclick="handlePayrollInputs(this)"> Is Payroll
+				      </div>
+				      <div class="col-xs-4">
+				        <input type="text" id="payrollDate"  name="payrollDate" class="form-control date_picker" placeholder="Payroll date" value="" />
+				      </div>
+				    </div>
+				    <br>
+                  	<div class="form-group row">
+				      <div class="offset-sm-2 col-sm-10">
+				        <button type="submit" class="btn btn-primary">Export</button>
+				      </div>
+				    </div>
+            	</form>
+            	</div>
+      		</div>
+  		</div>
+	</div>
+</SECTION>
+{% endblock content %}

@@ -8,6 +8,9 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from django.forms import inlineformset_factory, modelformset_factory
+from datetime import date, datetime
+from decimal import Decimal
+from workdays import networkdays
 from .models import Country, Organization, Holidays
 from .models import EmployeesDirectory, Department, EmploymentHistory, LeaveAccurals, Leaves
 from .forms import countryForm, organizationForm, holidaysForm
@@ -418,54 +421,6 @@ def leaves_allocate(request):
 	context = { 'lAccForm' : lAccForm, 'csvForm':csvForm }
 	return render(request, 'hr/leaves_allocate.html', context)
 
-@permission_required('hr.view_leaveaccurals', raise_exception=True)
-def export_leave_accruals(request):
-	if not request.user.is_authenticated():
-		return redirect('auth_login')
-
-	# Create the HttpResponse object with the appropriate CSV header.
-	response = HttpResponse(content_type='text/csv')
-	response['Content-Disposition'] = 'attachment; filename="employeeLeaveAccruals.csv"'
-
-	empList = EmployeesDirectory.objects.all()
-	writer = csv.writer(response)
-	writer.writerow(['Employee', 'CL', 'PL', 'SL', 'COMP', 'LOP', 'WFH'])
-	for emp in empList:
-		lAccList = LeaveAccurals.objects.filter(employee=emp)
-		lAccrual = {}
-		for lAcc in lAccList:
-			lAccrual['%s'%(lAcc.leaveType)] = lAcc.accuredLeaves
-
-		print("*******************************************")
-		if lAccrual.has_key('CL'):
-			cl = lAccrual['CL']
-		else:
-			cl = 0.0
-		if lAccrual.has_key('PL'):
-			pl = lAccrual['PL']
-		else:
-			pl = 0.0
-		if lAccrual.has_key('SL'):
-			sl = lAccrual['SL']
-		else:
-			sl = 0.0
-		if lAccrual.has_key('COMP'):
-			comp = lAccrual['COMP']
-		else:
-			comp = 0.0
-		if lAccrual.has_key('LOP'):
-			lop = lAccrual['LOP']
-		else:
-			lop = 0.0
-		if lAccrual.has_key('WFH'):
-			wfh = lAccrual['WFH']
-		else:
-			wfh = 0.0
-
-		print("%s : CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." % (emp, cl, pl, sl, comp, lop, wfh))
-		writer.writerow(['%s'% (emp), '%s' %(cl), '%s'%(pl), '%s'%(sl), '%s'%(comp), '%s'%(lop), '%s'%(wfh)])
-	return response	
-
 @permission_required('hr.view_leaves', raise_exception=True)
 def leaves_list(request):
 	if not request.user.is_authenticated():
@@ -491,12 +446,11 @@ def leaves_list(request):
 			Q(startedDate__range=(startDateSearch, endDateSearch)) |
                         Q(endDate__range=(startDateSearch, endDateSearch))
 			)
-        elif startDateSearch:
-                #print("Start Date based search received!!!!!!......")
-                leavesList = leavesList.filter(
-                        Q(startedDate__lte=startDateSearch) &
-                        Q(endDate__gte=startDateSearch)
-                        )
+	elif startDateSearch:
+		#print("Start Date based search received!!!!!!......")
+		leavesList = leavesList.filter(
+			Q(startedDate__lte=startDateSearch) & Q(endDate__gte=startDateSearch)
+			)
 	elif endDateSearch:
 		#print("End Date based search received!!!!!!......")
 		leavesList = leavesList.filter(
@@ -763,3 +717,282 @@ def leave_update(request, id):
 		"leaveForm" : lForm
 	}
 	return render(request, 'hr/edit_leave.html', context)
+
+@permission_required(['hr.view_leaveaccurals', 'hr.view_leaves', 'hr.view_employeesdirectory', 'hr.view_holidays'], raise_exception=True)
+def hr_data_export(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	if request.method == "GET":
+		exportCategory = request.GET.get("exportCategory")
+		if exportCategory:
+			# Create the HttpResponse object with the appropriate CSV header.
+			response = HttpResponse(content_type='text/csv')
+
+			searchStr = request.GET.get("searchStr")
+			sortby = request.GET.get("sortby")
+			employeeSelect = request.GET.get("employeeSelect")
+
+			if exportCategory == 'employees':
+				response['Content-Disposition'] = 'attachment; filename="employeesDirectory.csv"'
+				writer = csv.writer(response)
+				if (employeeSelect != '--'):
+					emp = get_object_or_404(EmployeesDirectory, id=employeeSelect)
+					writer.writerow(['ID', 'Firstname', 'Lastname', 'Employee_ID', 'Email', 'Manager', 'Designation'])
+					writer.writerow([emp.id, emp.firstname, emp.lastname, emp.employee_id, emp.email, emp.manager, emp.designation])
+				else:
+					if sortby != '--':
+						employeesList = EmployeesDirectory.objects.all().order_by(sortby)
+					else:
+						employeesList = EmployeesDirectory.objects.all()
+
+					if searchStr:
+						employeesList = employeesList.filter(
+							Q(designation__icontains=searchStr) |
+							Q(manager__firstname__icontains=searchStr) |
+							Q(manager__lastname__icontains=searchStr)
+							)
+					writer.writerow(['ID', 'Firstname', 'Lastname', 'Employee_ID', 'Email', 'Manager', 'Designation'])
+					for emp in employeesList:
+						writer.writerow([emp.id, emp.firstname, emp.lastname, emp.employee_id, emp.email, emp.manager, emp.designation])
+					pass
+			elif exportCategory == 'leaves':
+				response['Content-Disposition'] = 'attachment; filename="employeesLeaveHistory.csv"'
+				writer = csv.writer(response)
+				writer.writerow(['ID','Employee', 'Leave Summary', 'Leave Type', 'Start Date', 'End Date', '# Days', 'Status'])
+
+				if (employeeSelect != '--'):
+					emp = get_object_or_404(EmployeesDirectory, id=employeeSelect)
+					leavesList = Leaves.objects.filter(employee_id=emp).order_by(F('id').asc())
+					# filter(Q(status='SUBMITTED') | Q(status='REOPENED')).order_by
+					# Dump the collected leave history into CSV
+					for leave in leavesList:
+						writer.writerow([leave.id, leave.employee_id, leave.reason, leave.leaveType, leave.startedDate, leave.endDate, leave.numberOfDays, leave.status])
+				else:
+					leaveType = request.GET.get("leaveType")
+					startDateSearch = request.GET.get("startDate")
+					endDateSearch = request.GET.get("endDate")
+
+					if sortby != '--':
+						employeesList = EmployeesDirectory.objects.all().order_by(sortby)
+					else:
+						employeesList = EmployeesDirectory.objects.all()
+
+					if searchStr:
+						employeesList = employeesList.filter(
+							Q(designation__icontains=searchStr) |
+							Q(manager__firstname__icontains=searchStr) |
+							Q(manager__lastname__icontains=searchStr)
+							)
+					for emp in employeesList:
+						leavesList = Leaves.objects.filter(employee_id=emp).order_by(F('id').asc())
+						if leaveType != '--':
+							leavesList = leavesList.filter(Q(leaveType__icontains=leaveType))
+
+						if startDateSearch and endDateSearch:
+							leavesList = leavesList.filter(
+								Q(startedDate__range=(startDateSearch, endDateSearch)) |
+					            Q(endDate__range=(startDateSearch, endDateSearch))
+								)
+						elif startDateSearch:
+							leavesList = leavesList.filter(
+								Q(startedDate__lte=startDateSearch) &
+								Q(endDate__gte=startDateSearch)
+								)
+						elif endDateSearch:
+							leavesList = leavesList.filter(
+								#Q(endDate__exact=endDateSearch)
+		                        Q(startedDate__lte=endDateSearch) &
+		                        Q(endDate__gte=endDateSearch)
+								)
+						# Dump the collected leave history into CSV
+						for leave in leavesList:
+							writer.writerow([leave.id, leave.employee_id, leave.reason,  leave.leaveType, leave.startedDate, leave.endDate, leave.numberOfDays, leave.status])
+						#employeesList for-loop ends here
+				pass
+			elif exportCategory == 'leavebalances':
+				response['Content-Disposition'] = 'attachment; filename="employeesLeaveAccruals.csv"'
+				writer = csv.writer(response)
+				writer.writerow(['Employee', 'CL', 'PL', 'SL', 'COMP-OFF', 'LOP', 'WFH'])
+
+				isPayroll = request.GET.get("isPayroll")
+				payrollDateSearch = request.GET.get("payrollDate")
+
+				if (employeeSelect != '--'):
+					emp = get_object_or_404(EmployeesDirectory, id=employeeSelect)
+					if isPayroll:
+						if payrollDateSearch:
+							lAccrual = payrollLeaveAccrualPerEmployee(emp, payrollDateSearch)
+						else:
+							lAccrual = payrollLeaveAccrualPerEmployee(emp, date.today())
+						#print("*** [PAYROLL] Leave Balance for Employee  [%s]  ***********" % (emp))
+						#print("CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." %(lAccrual['CL'], lAccrual['PL'], lAccrual['SL'], lAccrual['COMP'], lAccrual['LOP'], lAccrual['WFH']))
+						writer.writerow(['%s'% (emp), '%s' %(lAccrual['CL']), '%s'%(lAccrual['PL']), '%s'%(lAccrual['SL']), '%s'%(lAccrual['COMP']), '%s'%(lAccrual['LOP']), '%s'%(lAccrual['WFH'])])
+					else:
+						cl = 0.0
+						pl = 0.0
+						sl = 0.0
+						comp = 0.0
+						wfh = 0.0
+						lop =0.0
+						lAccList = LeaveAccurals.objects.filter(employee=emp)
+						for lAcc in lAccList:
+							if lAcc.leaveType == 'CL':
+								cl = lAcc.accuredLeaves
+							elif lAcc.leaveType == 'PL':
+								pl = lAcc.accuredLeaves
+							elif lAcc.leaveType == 'SL':
+								sl = lAcc.accuredLeaves
+							elif lAcc.leaveType == 'COMP':
+								comp = lAcc.accuredLeaves
+							elif lAcc.leaveType == 'LOP':
+								lop = lAcc.accuredLeaves
+							elif lAcc.leaveType == 'WFH':
+								wfh = lAcc.accuredLeaves
+						#print("Leave Balance for Employee >> %s : CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." % (emp, cl, pl, sl, comp, lop, wfh))
+						writer.writerow(['%s'% (emp), '%s' %(cl), '%s'%(pl), '%s'%(sl), '%s'%(comp), '%s'%(lop), '%s'%(wfh)])
+				else:
+					if sortby != '--':
+						employeesList = EmployeesDirectory.objects.all().order_by(sortby)
+					else:
+						employeesList = EmployeesDirectory.objects.all()
+
+					if searchStr:
+						employeesList = employeesList.filter(
+							Q(designation__icontains=searchStr) |
+							Q(manager__firstname__icontains=searchStr) |
+							Q(manager__lastname__icontains=searchStr)
+							)
+					for emp in employeesList:
+						if isPayroll:
+							if payrollDateSearch:
+								lAccrual = payrollLeaveAccrualPerEmployee(emp, payrollDateSearch)
+							else:
+								lAccrual = payrollLeaveAccrualPerEmployee(emp, date.today())
+							#print("[PAYROLL] Leave Balance for Employee  [%s] >>>" % (emp))
+							#print("CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." %(lAccrual['CL'], lAccrual['PL'], lAccrual['SL'], lAccrual['COMP'], lAccrual['LOP'], lAccrual['WFH']))
+							writer.writerow(['%s'% (emp), '%s' %(lAccrual['CL']), '%s'%(lAccrual['PL']), '%s'%(lAccrual['SL']), '%s'%(lAccrual['COMP']), '%s'%(lAccrual['LOP']), '%s'%(lAccrual['WFH'])])
+						else:
+							cl = 0.0
+							pl = 0.0
+							sl = 0.0
+							comp = 0.0
+							wfh = 0.0
+							lop =0.0
+							lAccList = LeaveAccurals.objects.filter(employee=emp)
+							for lAcc in lAccList:
+								if lAcc.leaveType == 'CL':
+									cl = lAcc.accuredLeaves
+								elif lAcc.leaveType == 'PL':
+									pl = lAcc.accuredLeaves
+								elif lAcc.leaveType == 'SL':
+									sl = lAcc.accuredLeaves
+								elif lAcc.leaveType == 'COMP':
+									comp = lAcc.accuredLeaves
+								elif lAcc.leaveType == 'LOP':
+									lop = lAcc.accuredLeaves
+								elif lAcc.leaveType == 'WFH':
+									wfh = lAcc.accuredLeaves
+							#print("%s : CL-%s, PL-%s, SL-%s, COMP-%s, LOP-%s, WFH-%s.." % (emp, cl, pl, sl, comp, lop, wfh))
+							writer.writerow(['%s'% (emp), '%s' %(cl), '%s'%(pl), '%s'%(sl), '%s'%(comp), '%s'%(lop), '%s'%(wfh)])
+					# employeesList FOR Loop ends here
+				pass
+			return response
+		else:
+			employeesList = EmployeesDirectory.objects.all()
+		pass
+
+	context = { "employeesList" : employeesList }
+	return render(request, 'hr/data_export.html', context)
+
+def payrollLeaveAccrualPerEmployee(employeeObj, payrollDateSearch):
+	lAccrual = {}
+	cl = 0.0
+	pl = 0.0
+	sl = 0.0
+	comp = 0.0
+	wfh = 0.0
+	lop =0.0
+	lastDay = date(date.today().year, 12, 31)
+	#print("Last Day of Year : %s, Payroll Date : %s.." % (lastDay, payrollDateSearch))
+
+	lAccList = LeaveAccurals.objects.filter(employee=employeeObj)
+	leavesList = Leaves.objects.order_by('leaveType').filter(
+								Q(employee_id__exact=employeeObj) & 
+								(
+									Q(status__exact='APPROVED') |
+									Q(status__exact='SUBMITTED') |
+									Q(status__exact='REOPENED')
+								) &
+								(
+									Q(startedDate__range=(payrollDateSearch, lastDay)) |
+									Q(endDate__range=(payrollDateSearch, lastDay))
+								)
+							)
+ 
+	if not lAccrual.has_key('CL'):
+		lAccrual['CL'] = 0.0
+	if not lAccrual.has_key('PL'):
+		lAccrual['PL'] = 0.0
+	if not lAccrual.has_key('SL'):
+		lAccrual['SL'] = 0.0
+	if not lAccrual.has_key('COMP'):
+		lAccrual['COMP'] = 0.0
+	if not lAccrual.has_key('LOP'):
+		lAccrual['LOP'] = 0.0
+	if not lAccrual.has_key('WFH'):
+		lAccrual['WFH'] = 0.0
+	
+	for lAcc in lAccList:
+		lAccrual['%s'%(lAcc.leaveType)] = lAcc.accuredLeaves
+
+	for leave in leavesList:
+		numDays = leave.numberOfDays
+
+		temp = datetime.strptime(payrollDateSearch, '%Y-%m-%d')
+		payrollDate = date(temp.year, temp.month, temp.day)
+		fromDate = leave.startedDate
+		endDate = leave.endDate
+		#print("From : %s, Payroll : %s, End : %s.." % (fromDate, payrollDate, endDate))
+
+		if (fromDate <= payrollDate) and (endDate >= payrollDate):
+			#print("-------- OVERLAPPING LEAVE WITH PAYROLL DATE")
+			holidays = Holidays.objects.filter(country=employeeObj.organization.country).values('date')
+			empHolidays = []
+			for holiday in holidays:
+				empHolidays.append(holiday['date'])
+			numDays = Decimal(networkdays(fromDate, payrollDate, empHolidays))
+			#print("Actual Number of Past Leave Days: [%s]" % (Decimal(numberBusinessDays)))
+
+		if leave.leaveType == 'CL':
+			if lAccrual.has_key('CL'):
+				lAccrual['CL'] = (lAccrual['CL'] + numDays)
+			else:
+				lAccrual['CL'] = numDays
+		elif leave.leaveType == 'PL':
+			if lAccrual.has_key('PL'):
+				lAccrual['PL'] = (lAccrual['PL'] + numDays)
+			else:
+				lAccrual['PL'] = numDays
+		elif leave.leaveType == 'SL':
+			if lAccrual.has_key('SL'):
+				lAccrual['SL'] = (lAccrual['SL'] + numDays)
+			else:
+				lAccrual['SL'] = numDays
+		elif leave.leaveType == 'COMP':
+			if lAccrual.has_key('COMP'):
+				lAccrual['COMP'] = (lAccrual['COMP'] + numDays)
+			else:
+				lAccrual['COMP'] = numDays
+		elif leave.leaveType == 'LOP':
+			if lAccrual.has_key('LOP'):
+				lAccrual['LOP'] = (lAccrual['LOP'] + numDays)
+			else:
+				lAccrual['LOP'] = numDays
+		elif leave.leaveType == 'WFH':
+			if lAccrual.has_key('WFH'):
+				lAccrual['WFH'] = (lAccrual['WFH'] + numDays)
+			else:
+				lAccrual['WFH'] = numDays
+
+	return lAccrual
