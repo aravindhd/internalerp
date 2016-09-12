@@ -147,7 +147,7 @@ CRONJOBS = [
 
 # Deployment
 
-DEPLOYMENT_PORTAL_URL = "http://192.168.1.236/"
+DEPLOYMENT_PORTAL_URL = "http://61.16.140.205:2401/"
 
 EMAIL_HOST = 'remote.embedur.com'
 #EMAIL_HOST_USER = 'embedur\\aravindhd'
