@@ -37,7 +37,7 @@ urlpatterns = [
     #url(r'^$', include('<appname>.views.<viewName>')),
     #...#
 
-    url(r'^inplaceeditform/', include('inplaceeditform.urls')),
+    #url(r'^inplaceeditform/', include('inplaceeditform.urls')),
 
     #...#
 ]
