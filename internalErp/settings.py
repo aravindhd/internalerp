@@ -310,10 +310,10 @@ LEAVE_DEFAULT_STATUS = 'CREATED'
 
 # ASSET MANAGEMENT #
 ASSET_PRIVILEGES_CHOICES = (
-    ('EMPLOYEE', 'Employee'),
-    ('ADMIN', 'Admin'),
-    ('TECHNICIAN', 'Technician'),
-    ('VALIDATOR', 'Validator'),
+    ('ASSETS-EMPLOYEE', 'Employee'),
+    ('ASSETS-ADMIN', 'Assets-Admin'),
+    ('ASSETS-TECHNICIAN', 'Technician'),
+    ('ASSETS-VALIDATOR', 'Validator'),
 )
 
 DEFAULT_ASSET_PRIVILEGES_CHOICE = 'EMPLOYEE'

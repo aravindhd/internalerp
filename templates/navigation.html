@@ -120,18 +120,6 @@
 							</li>
 							{% endif %}
 							{% if user.is_superuser or user.employeesdirectory.role == 'HR-MANAGER' %}
-								<!--li class="dropdown-submenu">
-									<a href="#" onclick="document.location='{{ hrDataExport }}'">HR Data Export</a>
-									<ul class="dropdown-menu">
-										<li><a tabindex="-1" href="#">Export</a></li>
-											<ul class="dropdown-menu">
-												<li><a href="#">3rd level</a></li>
-												<li><a href="#">3rd level</a></li>
-											</ul>
-										<li><a href="#">Second level</a></li>
-										<li><a href="#">Second level</a></li>
-									</ul>
-								</li-->
 							<li><a href="#" onclick="document.location='{{ hrDataExport }}'">Data Export</a></li>	
 							{% endif %}
 							<li><a href="#" onclick="document.location='{{ empInfoUrl }}'">My Info</a></li>	
@@ -156,14 +144,8 @@
 							<li><a href="#" onclick="document.location='{{holidaysUrl}}'">Holidays</a></li>
 						</ul>
 					</li>
-					<!--li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
-						aria-haspopup="true" aria-expanded="false">Assets<span class="caret"></span></a>
-						<ul class="dropdown-menu">
-							<li><a href="#" onclick="document.location='{{newCountryUrl}}'">Add Categories</a></li>
-							<li><a href="#" onclick="alert('Yet to Implement')">Assets</a></li>
-						</ul>
-					</li-->
+					{% endif %}
+					{% if user.is_superuser or user.employeesdirectory.assets_privilege != 'ASSETS-EMPLOYEE' %}
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
 						aria-haspopup="true" aria-expanded="false">Asset Management<span class="caret"></span></a>
@@ -174,32 +156,36 @@
 						{% url 'assets_assigned' as assignedAssetsUrl %}
 						{% url 'assets_instock' as instockAssetsUrl %}
 						<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-							{% if perms.assets.view_assets %}
-								<li class="dropdown-submenu">
-									<a href="#">Assets</a>
-									<ul class="dropdown-menu">
-									  	{% if perms.hr.add_assets %}
-										<li><a tabindex="-1" href="#" onclick="document.location='{{ addAssetUrl }}'">Add Asset</a></li>
-										{% endif %}
-										<li><a href="#" onclick="document.location='{{ viewAssetsUrl }}'">View Assets</a></li>
-										<li><a href="#" onclick="document.location='{{ instockAssetsUrl }}'">Assets In Stock</a></li>
-										<li><a href="#" onclick="document.location='{{ assignedAssetsUrl }}'">Assets Assigned</a></li>
-									</ul>
-								</li>
-								<li class="dropdown-submenu">
-									<a href="#">Asset Category</a>
-									<ul class="dropdown-menu">
-									  	{% if perms.assets.add_asset_categories %}
-										<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
-										{% endif %}
-										<li><a tabindex="-1" href="#" onclick="document.location='{{ categoriesUrl }}'">Categories</a></li>
-									</ul>
-								</li>
+							<li class="dropdown-submenu">
+								<a href="#">Assets</a>
+								<ul class="dropdown-menu">
+								  	{% if perms.assets.add_assets %}
+									<li><a tabindex="-1" href="#" onclick="document.location='{{ addAssetUrl }}'">Add Asset</a></li>
+									{% endif %}
+									{% if perms.assets.view_assets %}
+									<li><a href="#" onclick="document.location='{{ viewAssetsUrl }}'">View Assets</a></li>
+									<li><a href="#" onclick="document.location='{{ instockAssetsUrl }}'">Assets In Stock</a></li>
+									<li><a href="#" onclick="document.location='{{ assignedAssetsUrl }}'">Assets Assigned</a></li>
+									{% endif %}
+								</ul>
+							</li>
+							{% if user.is_superuser or user.employeesdirectory.assets_privilege != 'ASSETS-VALIDATOR' %}
+							<li class="dropdown-submenu">
+								<a href="#">Asset Category</a>
+								<ul class="dropdown-menu">
+								  	{% if perms.assets.add_asset_categories %}
+									<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
+									{% endif %}
+									{% if perms.assets.view_asset_categories %}
+									<li><a tabindex="-1" href="#" onclick="document.location='{{ categoriesUrl }}'">Categories</a></li>
+									{% endif %}
+								</ul>
+							</li>
 							{% endif %}
 						</ul>
 					</li>
-				</ul>
-				{% endif %}
+					{% endif %}
+				</ul> <!-- TEST -->				
 				<div class="header-icons">				    
 				    	<div class="welcome_text">Welcome</div>
 						<div class="user_text">

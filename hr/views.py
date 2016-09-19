@@ -232,6 +232,8 @@ def employee_create(request):
 			user.last_name=empData['lastname']
 			empGroup, created = Group.objects.get_or_create(name=empData['role'], defaults={ 'name' : empData['role'] })
 			user.groups.add(empGroup)
+			assetGroup, created = Group.objects.get_or_create(name=empData['assets_privilege'], defaults={ 'name' : empData['assets_privilege'] })
+			user.groups.add(assetGroup)
 			user.save()
 
 			# Creating Employee record
