@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<SECTION class="content">
+	
+<div class="table-responsive container"> 
+	<legend>Assets</legend>
+    <form method="GET" action=''>
+	<div class="search-box">
+		<label for="name" class="control-label">Filters</label>
+		<input type="text" name="searchQueryStr" style="width: 30%;" class="form-control" placeholder="Search By ID, Name, Model, Status, Assigned To" value="{{ request.GET.searchQueryStr }}" />
+        <input type="text" name="searchByTags" style="width: 25%;" class="form-control" placeholder="Search By Tags" value="{{ request.GET.searchByTags }}" />
+        <input type="submit" class="btn btn-primary" value="Search"></input>
+        <label class="step-links" style="float:right;display: inline-block; margin-bottom: 5px;font-weight: bold;">
+            {% if assetsList.has_previous %}
+            <a href="?page={{ empList.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ assetsList.number }} of {{ assetsList.paginator.num_pages }}
+            </span>
+            {% if assetsList.has_next %}
+            <a href="?page={{ empList.next_page_number }}">Next</a>
+            {% endif %}
+        </label>
+	</div>
+    <div class="panel-body">
+        <table id="myTable" class="table table-fixedheader table-hover">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th width="10%">Asset ID</th>
+                    <th width="20%">Name</th>
+                    <th width="20%">Category</th>
+                    <th width="20%">Model</th>
+                    <th width="20%">status</th>
+                </tr>
+            </thead>
+            <tbody style="height:200px">
+                {% for asset in assetsList %}
+                {% url 'asset_details' id=asset.id as assetUrl %}
+                <tr onclick="document.location='{{ assetUrl }}'">
+                    <td width="2%">{{ asset.id }}</td>
+                    <td width="10%">{{ asset.assetId }}</td>
+                    <td width="20%">{{ asset.name }}</td>
+                    <td width="20%">{{ asset.category }}</td>
+                    <td width="20%">{{ asset.model }}</td>
+                    <td width="20%">{{ asset.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    
+  </div>	
+</SECTION>
+{% endblock content %}

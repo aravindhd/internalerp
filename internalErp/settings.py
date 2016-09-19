@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'hr',
+    'assets',
     'utils',
     'bootstrapform',
     'registration',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'inplaceeditform_extra_fields',  # this is optional but recommended
     'bootstrap3_datetime', # this is optional but recommended
     'django_crontab',
+    'tagging',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -186,6 +188,9 @@ MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
 
+#DJANGO-TAGGING
+#FORCE_LOWERCASE_TAGS = True
+
 # Auto-discovering of application specific settings.
 #for app in INSTALLED_APPS:
 #    try:
@@ -302,3 +307,34 @@ LEAVE_DEFAULT_STATUS = 'CREATED'
 #)
 
 #DEFAULT_EXPENSE_TYPE = 'TRV'
+
+# ASSET MANAGEMENT #
+ASSET_PRIVILEGES_CHOICES = (
+    ('EMPLOYEE', 'Employee'),
+    ('ADMIN', 'Admin'),
+    ('TECHNICIAN', 'Technician'),
+    ('VALIDATOR', 'Validator'),
+)
+
+DEFAULT_ASSET_PRIVILEGES_CHOICE = 'EMPLOYEE'
+
+ASSET_STATUS_CHOICES = (
+    ('INSTOCK', 'In-Stock'),
+    ('ASSIGNED', 'Assigned'),
+    ('LOST', 'Lost'),
+    ('STOLEN', 'Stolen'),
+    ('MISSING', 'Missing'),
+    ('INSERVICE', 'In-Service'),
+    ('REPAIR', 'Repair'),
+)
+
+ASSET_DEFAULT_STATUS = 'INSTOCK'
+
+ASSET_ASSIGNMENT_CATEGORY = (
+    ('GENERAL', 'General'),
+    ('EMPLOYEE', 'Employee'),
+    ('MANAGER', 'Manager'),
+    ('SHARED', 'Shared'),
+)
+
+ASSET_DEFAULT_ASSIGNMENT_CATEGORY = 'GENERAL'

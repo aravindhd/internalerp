@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load staticfiles %}
+{% load bootstrap %}
+<script src="{% static 'js/date-picker.js' %}"></script>
+<link href="{% static 'css/date-picker.css' %}" rel="stylesheet">
+<script>
+  $(function() {
+    //alert("Trying the Date Widget...");
+    $( ".date_picker" ).datepicker({ format: "yyyy-mm-dd" });
+  });
+
+  function updateAssignmentElements(element) {
+    alert("Hey :" + element.options[element.selectedIndex].value)
+    if(element.options[element.selectedIndex].value == 'ASSIGNED') {
+      document.getElementById('id_assignmentCategory').disabled = false
+      document.getElementById('id_assignedTo').disabled = false
+      document.getElementById('id_assignedDate').disabled = false
+    } else {
+      document.getElementById('id_assignmentCategory').disabled = true
+      document.getElementById('id_assignedTo').disabled = true
+      document.getElementById('id_assignedDate').disabled = true
+    }
+  }
+</script>
+<SECTION class="content">
+<form class="form-horizontal" role="form" method="POST" action="">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Asset Form
+        </legend>
+        
+        {{ aForm|bootstrap_horizontal }}	
+    </fieldset>
+	<div class="buttons-container">
+		<input type="submit" class="btn btn-primary" value="Submit"></input>
+    {% url 'assets_view' as cancelUrl %}
+		<button onclick="window.location.href='{{ cancelUrl }}'" type="button" class="btn btn-warning">Cancel</button>
+	</div>
+  <!-- Modal -->
+  <!-- Modal content-->
+  <!-- Modal Code Ends Here -->
+</form>
+	
+</SECTION>
+{% endblock content %}

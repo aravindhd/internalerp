@@ -38,6 +38,7 @@ class employeeForm(forms.ModelForm):
 			"employment_type",
 			"designation",
 			"role",
+			"assets_privilege",
 			"is_active",
 			"image",
 			]
@@ -52,6 +53,7 @@ class employeeForm(forms.ModelForm):
             'is_active': 'Is Active',
             'image' : 'Employee Image',
             'role' : 'User Role',
+            'assets_privilege' : 'Assets Privilege',
         }
 
 class holidaysForm(forms.ModelForm):

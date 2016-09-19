@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load tagging_tags %}
+{% block content %}
+{% load staticfiles %}
+<SECTION class="content">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title">Asset Details</h3>      
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-12 col-lg-12">
+                <div id="user_info">
+                  <table  class="table table-user-information">
+                    <tbody>
+                      <tr>
+                        <td class="field-label" style="width:25%">Asset ID</td>
+                        <td>{{ assetInfo.assetId }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Name</td>
+                        <td>{{ assetInfo.name }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Category</td>
+                        <td width="20%">{{ assetInfo.category }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Model</td>
+                        <td>{{ assetInfo.model }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Serial Number</td>
+                        <td>{{ assetInfo.serialNumber }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Manufacturer / Vendor</td>
+                        <td>{{ assetInfo.manufacturer }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Status</td>
+                        <td>{{ assetInfo.status }}</td>
+                      </tr>
+                      {% if assetInfo.status == 'ASSIGNED' %}
+                      <tr>
+                        <td class="field-label" style="width:25%">Assignment Category</td>
+                        <td>{{ assetInfo.assignmentCategory }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Assigned To</td>
+                        <td>{{ assetInfo.assignedTo }}</td>
+                      </tr>
+                      <tr>
+                        <td class="field-label" style="width:25%">Assigned Date</td>
+                        <td>{{ assetInfo.assignedDate }}</td>
+                      </tr>
+                      {% endif %}
+                      <tr>
+                        <td class="field-label" style="width:25%">Tags</td>
+                        <td>
+                          {% tags_for_object assetInfo as tag_list %}
+                          {% for tag in tag_list %}
+                            <span style='color:blue; font-style: italic;'>{{ tag }}</span>&nbsp;&nbsp;&nbsp;
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div>
+              
+              {% if user.employeesdirectory.is_manager %}
+                  {% url 'assets_view' as backUrl %}
+              {% elif user.employeesdirectory.role == 'EMPLOYEE' %}
+                  {% url 'assets_view' as backUrl %}
+              {% else %}
+                  {% url 'assets_view' as backUrl %}
+              {% endif %}
+              {% url 'asset_update' id=assetInfo.id as editUrl %}
+              <span class="pull-right">
+                <a href="{{ editUrl }}" data-original-title="Edit this Asset" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{{ backUrl }}" data-original-title="Go back to previous page" data-toggle="tooltip" type="button" class="btn btn-sm btn-info">Back</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>  
+</SECTION>
+{% endblock content %}
+

@@ -48,6 +48,7 @@ class EmployeesDirectory(models.Model):
 	manager = models.ForeignKey("self", null=True,blank=True)
 	is_manager = models.BooleanField(default=False)
 	role = models.CharField(max_length=25, choices=settings.USER_GROUP_CHOICES, default=settings.DEFAULT_USER_GROUP_CHOICE)
+	assets_privilege = models.CharField(max_length=25, choices=settings.ASSET_PRIVILEGES_CHOICES, default=settings.DEFAULT_ASSET_PRIVILEGES_CHOICE)
 	user = models.OneToOneField('auth.user', on_delete=models.CASCADE)
 	image = models.FileField(upload_to=upoad_location, null=True,blank=True)
 	def __unicode__(self):

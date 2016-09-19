@@ -33,6 +33,7 @@ urlpatterns = [
     #url(r'^accounts/', include('registration.backends.default.urls')),
 
     url(r'^hr/', include('hr.urls')),
+    url(r'^assets/', include('assets.urls')),
     url(r'^$', include('hr.urls')),
     #url(r'^$', include('<appname>.views.<viewName>')),
     #...#
