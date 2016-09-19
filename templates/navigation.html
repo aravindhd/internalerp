@@ -169,16 +169,12 @@
 									{% endif %}
 								</ul>
 							</li>
-							{% if user.is_superuser or user.employeesdirectory.assets_privilege != 'ASSETS-VALIDATOR' %}
+							{% if user.employeesdirectory.assets_privilege != 'ASSETS-VALIDATOR' %}
 							<li class="dropdown-submenu">
 								<a href="#">Asset Category</a>
 								<ul class="dropdown-menu">
-								  	{% if perms.assets.add_asset_categories %}
-									<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
-									{% endif %}
-									{% if perms.assets.view_asset_categories %}
+								  	<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
 									<li><a tabindex="-1" href="#" onclick="document.location='{{ categoriesUrl }}'">Categories</a></li>
-									{% endif %}
 								</ul>
 							</li>
 							{% endif %}
