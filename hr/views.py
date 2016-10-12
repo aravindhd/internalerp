@@ -13,6 +13,7 @@ from decimal import Decimal
 from workdays import networkdays
 from .models import Country, Organization, Holidays
 from .models import EmployeesDirectory, Department, EmploymentHistory, LeaveAccurals, Leaves
+from assets.models import Assets
 from .forms import countryForm, organizationForm, holidaysForm
 from .forms import employeeForm, leaveRequestForm, leaveEditForm, leaveAccuralForm, singleEmployeeLeaveAccuralForm, csvImportLeaveAccuralForm
 from .tables import EmployeesTable
@@ -206,7 +207,12 @@ def employee_info(request):
 	for acc in lAccList:
 		leaveAccuralList['%s'%(acc.leaveType)] = acc.accuredLeaves
 
-	context = { 'empInfo' : empInfo, 'leaveAccuralList' : leaveAccuralList }
+	assetsList = Assets.objects.filter(Q(status__icontains = 'ASSIGNED') & 
+										(Q(assignmentCategory__icontains = 'EMPLOYEE') |
+										  Q(assignmentCategory__icontains = 'SHARED'))& 
+										Q(assignedTo__firstname__icontains=empInfo.firstname))
+
+	context = { 'empInfo' : empInfo, 'leaveAccuralList' : leaveAccuralList, "assetsList" : assetsList }
 	return render(request, 'hr/view_employee.html', context)
 
 @permission_required('hr.add_employeesdirectory', raise_exception=True)

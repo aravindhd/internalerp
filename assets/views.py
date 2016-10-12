@@ -146,6 +146,30 @@ def asset_details(request, id):
 	context = { 'assetInfo' : assetInfo }
 	return render(request, 'assets/asset_details.html', context)
 
+def assets_per_employee(request, id):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	empInfo = get_object_or_404(EmployeesDirectory, id=id)
+	assetsList = Assets.objects.filter(Q(status__icontains = 'ASSIGNED') & 
+										(Q(assignmentCategory__icontains = 'EMPLOYEE') |
+										  Q(assignmentCategory__icontains = 'SHARED'))& 
+										Q(assignedTo__firstname__icontains=empInfo.firstname))
+	context = { "assetsList" : assetsList }
+	return render(request, 'assets/assets_view.html', context)
+
+def myassets(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	empInfo = get_object_or_404(EmployeesDirectory, user=request.user)
+	assetsList = Assets.objects.filter(Q(status__icontains = 'ASSIGNED') & 
+										(Q(assignmentCategory__icontains = 'EMPLOYEE') |
+										  Q(assignmentCategory__icontains = 'SHARED'))& 
+										Q(assignedTo__firstname__icontains=empInfo.firstname))
+	context = { "assetsList" : assetsList }
+	return render(request, 'assets/assets_view.html', context)
+
 def asset_update(request, id):
 	if not request.user.is_authenticated():
 		return redirect('auth_login')

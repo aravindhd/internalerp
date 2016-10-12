@@ -7,26 +7,26 @@ function toggleProfile(value){
 	if(value == "0"){
 		document.getElementById('user_info').style.display = "block";
 		document.getElementById('leave_info').style.display = "none";
-		//document.getElementById('assets_info').style.display = "none";
+		document.getElementById('assets_info').style.display = "none";
 		document.getElementById('leave_link').classList.remove("link-active");
-		//document.getElementById('assets_link').classList.remove("link-active");
+		document.getElementById('assets_link').classList.remove("link-active");
 		document.getElementById('user_link').classList.add("link-active");
 	}
 	else if(value == "1"){
 		document.getElementById('leave_info').style.display = "block";
 		document.getElementById('user_info').style.display = "none";
-		//document.getElementById('assets_info').style.display = "none";
+		document.getElementById('assets_info').style.display = "none";
 		document.getElementById('user_link').classList.remove("link-active");
-		//document.getElementById('assets_link').classList.remove("link-active");
+		document.getElementById('assets_link').classList.remove("link-active");
 		document.getElementById('leave_link').classList.add("link-active");
 	}
-	else {
-		//document.getElementById('assets_info').style.display = "block";
+	else { // Assets case
+		document.getElementById('assets_info').style.display = "block";
 		document.getElementById('leave_info').style.display = "none";
 		document.getElementById('user_info').style.display = "none";
 		document.getElementById('leave_link').classList.remove("link-active");
 		document.getElementById('user_link').classList.remove("link-active");
-		//document.getElementById('assets_link').classList.add("link-active");
+		document.getElementById('assets_link').classList.add("link-active");
 	}
 
 }
@@ -48,6 +48,7 @@ function toggleProfile(value){
       					<div class="links">
       						<div id="user_link" class="link-active"><a onclick="toggleProfile(0);">Profile Info</a></div>
       						<div id="leave_link"><a onclick="toggleProfile(1);">Leave balance</a></div>
+                  <div id="assets_link"><a onclick="toggleProfile(2);">My Assets</a></div>
       					</div>
     	        </div>
               <div class=" col-md-9 col-lg-9 ">
@@ -130,6 +131,30 @@ function toggleProfile(value){
                         <td>0 days</td>
                         {% endif %}
                       </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div id="assets_info" style="display:none;">
+                  <h3 class="info-title">Assets Information</h3>
+                  <table  class="table table-user-information">
+                    <thead>
+                        <tr>
+                            <th width="10%">Asset ID</th>
+                            <th width="20%">Name</th>
+                            <th width="20%">Category</th>
+                            <th width="20%">Model</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for asset in assetsList %}
+                    {% url 'asset_details' id=asset.id as assetUrl %}
+                    <tr onclick="document.location='{{ assetUrl }}'">
+                        <td width="10%">{{ asset.assetId }}</td>
+                        <td width="20%">{{ asset.name }}</td>
+                        <td width="20%">{{ asset.category }}</td>
+                        <td width="20%">{{ asset.model }}</td>
+                    </tr>
+                    {% endfor %}
                     </tbody>
                   </table>
                 </div>

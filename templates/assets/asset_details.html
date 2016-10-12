@@ -77,7 +77,7 @@
               {% if user.employeesdirectory.is_manager %}
                   {% url 'assets_view' as backUrl %}
               {% elif user.employeesdirectory.role == 'EMPLOYEE' %}
-                  {% url 'assets_view' as backUrl %}
+                  {% url 'myassets' as backUrl %}
               {% else %}
                   {% url 'assets_view' as backUrl %}
               {% endif %}

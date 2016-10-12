@@ -181,12 +181,14 @@
 							{% else %}
 								{% url 'asset_avail' as assetAvail %}
 								{% url 'asset_avail' as availedAssetSummary %}
-								{% url 'asset_avail' as myAssets %}
+								{% url 'myassets' as myAssets %}
+								<!--
 								{% if user.employeesdirectory.role == 'MANAGER' %}
 								<li><a href="#" onclick="document.location='{{ assetAvail }}'">Assets to Approve</a></li>
 								{% endif %}
 								<li><a href="#" onclick="document.location='{{ assetAvail }}'">Avail Asset</a></li>
 								<li><a href="#" onclick="document.location='{{ availedAssetSummary }}'">Availed Asset Summary</a></li>
+								-->
 								<li><a href="#" onclick="document.location='{{ myAssets }}'">My Assets</a></li>	
 							{% endif %}
 						</ul>
