@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.conf import settings
 from .models import AssetCategories, Assets
 from hr.models import EmployeesDirectory
-from .forms import assetCategoryForm, assetForm
+from .forms import assetCategoryForm, assetForm, availAssetForm
 from tagging.models import TaggedItem
 
 # Create your views here.
@@ -34,6 +34,24 @@ def asset_categories(request):
 	categories = AssetCategories.objects.all()
 	context = { "categories" : categories }
 	return render(request, 'assets/categories.html', context)
+
+def get_assets_by_category(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+
+	
+	if request.is_ajax() and request.method == 'POST':
+		category = request.POST.get("category")
+		if category:
+			assetsList = Assets.objects.filter(category=category)
+			pass
+		else:
+			assetsList = Assets.objects.all()
+			pass
+	else:
+		assetsList = Assets.objects.all()
+
+	return render(request,'assets/ajax_get_assets.html', locals())
 
 def asset_add(request):
 	if not request.user.is_authenticated():
@@ -151,3 +169,17 @@ def asset_update(request, id):
 		pass
 	context = { 'aForm' : aForm }
 	return render(request, 'assets/asset_form.html', context)
+
+def asset_avail(request):
+	if not request.user.is_authenticated():
+		return redirect('auth_login')
+	
+	if request.method == "POST":
+		availForm = availAssetForm(request.POST or None)
+		if availForm.is_valid():
+			availForm.save()
+	else:
+		availForm = availAssetForm()
+	context = { 'availForm' : availForm }
+	return render(request, 'assets/asset_avail.html', context)
+

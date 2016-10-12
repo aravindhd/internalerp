@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import uuid
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
@@ -12,6 +13,7 @@ from hr.models import EmployeesDirectory
 class AssetCategories(models.Model):
 	category = models.CharField(blank=False, unique=True, max_length=30)
 	description = models.CharField(blank=False, max_length=100)
+	enable_asset_avail_workflow = models.BooleanField(default=False)
 	class Meta:
 		permissions = (
             ('view_asset_categories', 'View Asset Categories'),
@@ -42,7 +44,12 @@ class Assets(models.Model):
 	def __str__(self):
 		return "%s %s %s" %(self.assetId, self.name, self.category)
 	def get_tags(self):
-		return Tag.objects.get_for_object(self) 
+		return Tag.objects.get_for_object(self)
 
-# Registering the model in Tagging application
-#register(Assets)
+class AvailAsset(models.Model):
+	#id = models.CharField(max_length=8,  primary_key=True, default=uuid.uuid4, editable=False)
+	assetId = models.ForeignKey(Assets)
+	employee = models.ForeignKey(EmployeesDirectory)
+	status = models.CharField(max_length=25, choices=settings.AVAIL_ASSET_STATUS_CHOICES, default=settings.AVAIL_ASSET_STATUS_DEFAULT_CHOICE)
+	availed_datetime = models.DateTimeField(auto_now=False,auto_now_add=False)
+	returned_datetime = models.DateTimeField(auto_now=False,auto_now_add=False)

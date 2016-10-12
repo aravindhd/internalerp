@@ -1,15 +1,16 @@
 import math
 from django import forms
-from .models import AssetCategories, Assets
+from .models import AssetCategories, Assets, AvailAsset
 from tagging.forms import TagField
 
 class assetCategoryForm(forms.ModelForm):
 	class Meta:
 		model = AssetCategories
-		fields = [ 'category', 'description' ]
+		fields = [ 'category', 'description', 'enable_asset_avail_workflow' ]
 		labels = {
             'category' : 'Asset category',
             'description' : 'Description',
+            'enable_asset_avail_workflow' : 'Enable Asset Avail Workflow'
         }
 
 class assetForm(forms.ModelForm):
@@ -67,4 +68,47 @@ class assetForm(forms.ModelForm):
             'assignedTo' : 'Assigned To',
             'assignedDate' : 'Assigned Date',
             'tags' : 'Tags(space separated)'
+        }
+
+class availAssetForm(forms.Form):
+	AssetCategory = forms.ModelChoiceField(queryset=AssetCategories.objects.filter(enable_asset_avail_workflow=True),required=True, label='Asset Category')
+	Asset = forms.ChoiceField(required=True)
+	AvailTime = forms.DateTimeField(label='Avail Date Time')
+	def __init__(self, *args, **kwargs):
+		super(availAssetForm, self).__init__(*args, **kwargs)
+		self.fields['AssetCategory'].widget.attrs['onclick'] = 'updateAssetElements(this);'
+		self.fields['AvailTime'].widget.attrs['class'] = 'datetime_picker'
+		pass
+	def clean(self):
+		pass
+
+class availedAssetUpdateForm(forms.ModelForm):
+	status = forms.ChoiceField(choices=(), required=True)
+	def __init__(self, userBased_Status_choices, isUserRole, *args, **kwargs):
+		super(availedAssetUpdateForm, self).__init__(*args, **kwargs)
+		self.fields['status'].choices = userBased_Status_choices
+		self.fields['id'].widget.attrs['readonly'] = True
+		if isUserRole == 'manager':
+			self.fields['assetId'].widget.attrs['class'] = 'readOnlySelect'
+			self.fields['availed_datetime'].widget.attrs['readonly'] = True
+			self.fields['returned_datetime'].widget.attrs['readonly'] = True
+		elif isUserRole == 'validator':
+			self.fields['assetId'].widget.attrs['class'] = 'readOnlySelect'
+			self.fields['availed_datetime'].widget.attrs['readonly'] = True 
+		pass
+	def clean(self):
+		pass
+	class Meta:
+		model = AvailAsset
+		fields = [ 'id' , 'assetId' , 'status', 'availed_datetime', 'returned_datetime', ]
+		widgets = {
+			'availed_datetime' : forms.DateTimeInput(attrs={'class' : 'date_picker'}),
+			'returned_datetime' : forms.DateTimeInput(attrs={'class' : 'date_picker'})
+		}
+		labels = {
+			'id' : 'Unique ID',
+            'assetId' : 'Asset',
+            'status' : 'Status',
+            'availed_datetime' : 'Avail Date Time',
+            'returned_datetime' : 'Return Date Time',
         }

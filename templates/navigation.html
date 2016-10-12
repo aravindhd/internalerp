@@ -145,42 +145,52 @@
 						</ul>
 					</li>
 					{% endif %}
-					{% if user.is_superuser or user.employeesdirectory.assets_privilege != 'ASSETS-EMPLOYEE' %}
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
 						aria-haspopup="true" aria-expanded="false">Asset Management<span class="caret"></span></a>
-						{% url 'asset_category_add' as newCategoryUrl %}
-						{% url 'asset_categories' as categoriesUrl %}
-						{% url 'asset_add' as addAssetUrl %}
-						{% url 'assets_view' as viewAssetsUrl %}
-						{% url 'assets_assigned' as assignedAssetsUrl %}
-						{% url 'assets_instock' as instockAssetsUrl %}
 						<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-							<li class="dropdown-submenu">
-								<a href="#">Assets</a>
-								<ul class="dropdown-menu">
-								  	{% if perms.assets.add_assets %}
-									<li><a tabindex="-1" href="#" onclick="document.location='{{ addAssetUrl }}'">Add Asset</a></li>
-									{% endif %}
-									{% if perms.assets.view_assets %}
-									<li><a href="#" onclick="document.location='{{ viewAssetsUrl }}'">View Assets</a></li>
-									<li><a href="#" onclick="document.location='{{ instockAssetsUrl }}'">Assets In Stock</a></li>
-									<li><a href="#" onclick="document.location='{{ assignedAssetsUrl }}'">Assets Assigned</a></li>
-									{% endif %}
-								</ul>
-							</li>
-							{% if user.employeesdirectory.assets_privilege != 'ASSETS-VALIDATOR' %}
-							<li class="dropdown-submenu">
-								<a href="#">Asset Category</a>
-								<ul class="dropdown-menu">
-								  	<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
-									<li><a tabindex="-1" href="#" onclick="document.location='{{ categoriesUrl }}'">Categories</a></li>
-								</ul>
-							</li>
+							{% if user.is_superuser or user.employeesdirectory.assets_privilege != 'ASSETS-EMPLOYEE' %}
+								{% url 'asset_category_add' as newCategoryUrl %}
+								{% url 'asset_categories' as categoriesUrl %}
+								{% url 'asset_add' as addAssetUrl %}
+								{% url 'assets_view' as viewAssetsUrl %}
+								{% url 'assets_assigned' as assignedAssetsUrl %}
+								{% url 'assets_instock' as instockAssetsUrl %}
+								<li class="dropdown-submenu">
+									<a href="#">Assets</a>
+									<ul class="dropdown-menu">
+									  	{% if perms.assets.add_assets %}
+										<li><a tabindex="-1" href="#" onclick="document.location='{{ addAssetUrl }}'">Add Asset</a></li>
+										{% endif %}
+										{% if perms.assets.view_assets %}
+										<li><a href="#" onclick="document.location='{{ viewAssetsUrl }}'">View Assets</a></li>
+										<li><a href="#" onclick="document.location='{{ instockAssetsUrl }}'">Assets In Stock</a></li>
+										<li><a href="#" onclick="document.location='{{ assignedAssetsUrl }}'">Assets Assigned</a></li>
+										{% endif %}
+									</ul>
+								</li>
+								{% if user.employeesdirectory.assets_privilege != 'ASSETS-VALIDATOR' %}
+									<li class="dropdown-submenu">
+										<a href="#">Asset Category</a>
+										<ul class="dropdown-menu">
+										  	<li><a tabindex="-1" href="#" onclick="document.location='{{ newCategoryUrl }}'">Add Category</a></li>
+											<li><a tabindex="-1" href="#" onclick="document.location='{{ categoriesUrl }}'">Categories</a></li>
+										</ul>
+									</li>
+								{% endif %}
+							{% else %}
+								{% url 'asset_avail' as assetAvail %}
+								{% url 'asset_avail' as availedAssetSummary %}
+								{% url 'asset_avail' as myAssets %}
+								{% if user.employeesdirectory.role == 'MANAGER' %}
+								<li><a href="#" onclick="document.location='{{ assetAvail }}'">Assets to Approve</a></li>
+								{% endif %}
+								<li><a href="#" onclick="document.location='{{ assetAvail }}'">Avail Asset</a></li>
+								<li><a href="#" onclick="document.location='{{ availedAssetSummary }}'">Availed Asset Summary</a></li>
+								<li><a href="#" onclick="document.location='{{ myAssets }}'">My Assets</a></li>	
 							{% endif %}
 						</ul>
 					</li>
-					{% endif %}
 				</ul> <!-- TEST -->				
 				<div class="header-icons">				    
 				    	<div class="welcome_text">Welcome</div>

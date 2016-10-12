@@ -12,4 +12,6 @@ urlpatterns = [
 	url(r'^instock/$', views.assets_instock, name='assets_instock'),
 	url(r'^details/(?P<id>[0-9]+)/$', views.asset_details, name='asset_details'),
 	url(r'^update/(?P<id>[0-9]+)/$', views.asset_update, name='asset_update'),
+	url(r'^avail/$', views.asset_avail, name='asset_avail'),
+	url(r'^getAssetsByCategory/$', views.get_assets_by_category, name='get_assets_by_category'),
 ]
